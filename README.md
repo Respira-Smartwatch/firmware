@@ -32,3 +32,9 @@ A repository for firmware developed for the Raspberry Pi prototype of Respira
    __mics.py__: implements a Mics class that allows for both mono, and stereo recording. It is based off of the give ncode in the respeaker driver library, but allows for easy use, and quick startup. See code for documentation.
 
 
+### Data\_Drivers
+
+   This folder contains files related to data collection
+
+   __dataflow.py__: Implements a live data collection/plotting class
+

@@ -80,8 +80,10 @@ class DataFlow:
         self._run() 
 
 
+    #   @breif: Internal function to handle the plotting thread
     def _plot(self, conn):
-
+        
+        # Define a signal handler to exit gracefully
         def __sigterm_handler(_signo, _stack_frame):
             print("CAUGHT EXCEPTION IN PLOT")
             exit(1)
@@ -94,7 +96,7 @@ class DataFlow:
         
         return
 
-
+    #   @breif: Internal funciton to be passed to file saving thread
     def _save(self, conn, outfile):
         
         # Define a signal handler to exit gracefully
@@ -113,6 +115,7 @@ class DataFlow:
             print(f"SAVING! saved: {rec_data}")
 
 
+    #   @breif: Internal function to handle data collection and distribution
     def _data_func(self, data_read, conn, data_read_args:list, continuous=True):
 
         def __sigterm_handler(_signo, _stack_frame):
@@ -136,6 +139,7 @@ class DataFlow:
             self.child_processes['save'].start()
         if self.live_plot:
             self.child_processes['plot'].start()
+
         self.child_processes['data_0'].start()
 
 
