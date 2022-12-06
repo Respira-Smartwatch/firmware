@@ -89,7 +89,7 @@ class DataFlow:
 
     def _plot(self, conn):
         ser = serial.Serial("/dev/ttyS0",
-                            baudrate=115200,
+                            baudrate=9600,
                             parity=serial.PARITY_NONE,
                             stopbits=serial.STOPBITS_ONE,
                             bytesize=serial.EIGHTBITS,
@@ -105,7 +105,7 @@ class DataFlow:
         while True:
             rec_data=conn.recv()
             print(f"PLOTTING - plotted: {rec_data}")
-            ser.write(rec_data)
+            ser.write(rec_data.to_bytes(4, 'little'))
 
         
         return
