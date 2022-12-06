@@ -105,7 +105,7 @@ class DataFlow:
         while True:
             rec_data=conn.recv()
             print(f"PLOTTING - plotted: {rec_data}")
-            ser.write(rec_data.to_bytes(4, 'little'))
+            ser.write(rec_data.to_bytes(1, 'little'))
 
         
         return
