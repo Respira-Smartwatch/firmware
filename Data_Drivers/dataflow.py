@@ -9,6 +9,8 @@
 import multiprocessing as mp
 import signal
 from datetime import datetime
+import serial
+
 
 # Class to determin dataflow of live rapid data collection 
 # To both a plotting utility and a save location
@@ -21,7 +23,7 @@ class DataFlow:
     #            data_read_channels: list of all data read functions.
     #                                   Function MUST RETURN the requested data
     # 
-    #            live_plot: True if a plot is desired
+    #            live_plot: True if a plot is desired - will output on serial port
     #            save_data: True if data is to be saved
     #            save_file: String of name of output file
     #            data_read_channel_args: list of args for each data_func -> must be 2d array 
@@ -42,6 +44,8 @@ class DataFlow:
 
         # outfile path is path to save file
         self.outfile_path = save_file
+
+
 
         # If the outfile_path is not set,
         # Set it to the date and time
@@ -81,18 +85,28 @@ class DataFlow:
 
 
     #   @breif: Internal function to handle the plotting thread
+    #           This function will output to the serial port
+
     def _plot(self, conn):
-        
+        ser = serial.Serial("/dev/ttyS0",
+                            baudrate=115200,
+                            parity=serial.PARITY_NONE,
+                            stopbits=serial.STOPBITS_ONE,
+                            bytesize=serial.EIGHTBITS,
+                            timeout=1)        
+
+
         # Define a signal handler to exit gracefully
         def __sigterm_handler(_signo, _stack_frame):
             print("CAUGHT EXCEPTION IN PLOT")
             exit(1)
         
         signal.signal(signal.SIGTERM, __sigterm_handler)
-
         while True:
             rec_data=conn.recv()
             print(f"PLOTTING - plotted: {rec_data}")
+            ser.write(rec_data)
+
         
         return
 

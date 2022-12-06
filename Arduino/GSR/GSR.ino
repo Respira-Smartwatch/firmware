@@ -9,6 +9,5 @@ void loop() {
 }
 
 void req_handler(){
-    float sensorval = analogRead(A0);
-    Wire.write("%f\n", sensorval);
+    Wire.write("%f\n", analogRead(A0));
 }
