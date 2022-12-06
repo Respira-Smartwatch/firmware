@@ -38,3 +38,6 @@ A repository for firmware developed for the Raspberry Pi prototype of Respira
 
    __dataflow.py__: Implements a live data collection/plotting class
 
+   __gsr.py__:      This file implements a simple gsr class to utilize gsr via the i2c bus.
+   
+   __main.py__:      This is temporarily the main file which will deal with linking all drivers, using dataflow collection methods, and running the analysis

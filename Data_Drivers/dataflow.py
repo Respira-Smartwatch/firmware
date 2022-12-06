@@ -156,7 +156,10 @@ class DataFlow:
 
         self.child_processes['data_0'].start()
 
-
+    def pause(self):
+        pass
+    def resume(self):
+        pass
     #   @breif: cleanup method for sigkill intterupt
     def _kill(self, _signo, _stack_frame):
         for p in self.child_processes.values():

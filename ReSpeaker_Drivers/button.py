@@ -28,18 +28,20 @@ class Button:
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin, GPIO.IN)
+        GPIO.add_event_detect(self.pin, GPIO.FALLING, callback=self.func, bouncetime=100)
+
         
-    def listen(self):
-        while True:
-            state = GPIO.input(self.pin)
-
-            if state:
-                print("OFF")
-
-            else:
-                self.func()
-                
-            time.sleep(self.down_time)
+#    def listen(self):
+#        while True:
+#            state = GPIO.input(self.pin)
+#
+#            if state:
+#                print("OFF")
+#
+#            else:
+#                self.func()
+#                
+#            time.sleep(self.down_time)
     
 
 

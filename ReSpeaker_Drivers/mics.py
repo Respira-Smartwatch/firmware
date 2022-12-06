@@ -74,6 +74,9 @@ class Mics:
         wf.writeframes(b''.join(frames))
         wf.close()
 
+    # Will return instantaneous samples
+    def record_single(self):
+        pass
 
     # simplified method to call record for stereo mode
     def record_stereo(self, outfile: str="output.wav", length: float=5.0, fs: int=16000):
