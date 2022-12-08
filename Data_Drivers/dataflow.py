@@ -10,6 +10,7 @@ import multiprocessing as mp
 import signal
 from datetime import datetime
 import serial
+import time
 
 
 # Class to determin dataflow of live rapid data collection 
@@ -31,6 +32,7 @@ class DataFlow:
                         live_plot: bool=True, 
                         save_data: bool=True, 
                         save_file: str=None,
+                        fs: int=256,
                         data_read_channel_args: list[list[str]]=[[]]):
 
         # Child processes are labeled in dictionary
@@ -38,6 +40,7 @@ class DataFlow:
         self.data_in = data_read_channels
         self.save_data = save_data
         self.live_plot = live_plot
+        self.fs = fs
         
         # This is a 2d array: list of list of args for each datafunc
         self.data_args = data_read_channel_args
@@ -68,7 +71,7 @@ class DataFlow:
         # Set a child process for reading each of the datasources
         for idx, f in enumerate(self.data_in):
 
-            args = [f, tuple(self.active_pipes), self.data_args[idx]]
+            args = [f, tuple(self.active_pipes), self.fs, self.data_args[idx]]
 
             self.child_processes[f'data_{idx}'] = mp.Process( target=self._data_func, args=tuple(args))
 
@@ -104,7 +107,7 @@ class DataFlow:
         signal.signal(signal.SIGTERM, __sigterm_handler)
         while True:
             rec_data=conn.recv()
-            print(f"PLOTTING - plotted: {rec_data}")
+            #print(f"PLOTTING - plotted: {rec_data}")
             ser.write(rec_data.to_bytes(1, 'little'))
 
         
@@ -126,11 +129,11 @@ class DataFlow:
         while True:
             rec_data = conn.recv()
             outfile.writelines(str(rec_data)+',\n')
-            print(f"SAVING! saved: {rec_data}")
+            #print(f"SAVING! saved: {rec_data}")
 
 
     #   @breif: Internal function to handle data collection and distribution
-    def _data_func(self, data_read, conn, data_read_args:list, continuous=True):
+    def _data_func(self, data_read, conn, fs, data_read_args:list, continuous=True):
 
         def __sigterm_handler(_signo, _stack_frame):
             print("CAUGHT EXCEPTION IN DATA_FUNC")
@@ -138,7 +141,16 @@ class DataFlow:
         
         signal.signal(signal.SIGTERM, __sigterm_handler)
 
+
+        def tick():
+            t = time.time()
+            while True:
+                t += 1/fs
+                yield max(t-time.time(), 0)
+        
+        g = tick()
         while True:
+            time.sleep(next(g))
             data = data_read(*data_read_args)
             for c in conn:
                 c.send(data)
