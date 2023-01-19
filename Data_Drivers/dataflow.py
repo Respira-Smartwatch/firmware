@@ -54,11 +54,11 @@ class DataFlow:
         # Set it to the date and time
         if save_file is None or "/":
             date = datetime.today().strftime('%Y-%m-%d_%H:%M:%S')
-            self.outfile_path = "./"
+            self.outfile_path = "."
             self.filename = f"{date}.csv"
         
         elif "/" not in save_file:
-            self.outfile_path = f"./"
+            self.outfile_path = f"."
             self.filename = save_file
         
         else:
@@ -68,6 +68,7 @@ class DataFlow:
         if not os.path.exists(self.outfile_path):
             try:
                 os.mkdir(self.outfile_path)
+
             except PermissionError:
                 print(f"{self.outfile_path}is not a writeable Directory. Exiting...")
                 exit(1)
@@ -103,7 +104,6 @@ class DataFlow:
 
     #   @breif: Internal function to handle the plotting thread
     #           This function will output to the serial port
-
     def _plot(self, conn):
         ser = serial.Serial("/dev/ttyS0",
                             baudrate=9600,
@@ -111,6 +111,7 @@ class DataFlow:
                             stopbits=serial.STOPBITS_ONE,
                             bytesize=serial.EIGHTBITS,
                             timeout=1)        
+
 
 
         # Define a signal handler to exit gracefully
@@ -129,7 +130,6 @@ class DataFlow:
 
     #   @breif: Internal funciton to be passed to file saving thread
     def _save(self, conn, outfile):
-        
         # Define a signal handler to exit gracefully
         def __sigterm_handler(_signo, _stack_frame):
             print("\n\nCAUGHT EXCEPTION IN SAVE\n\n")
@@ -140,6 +140,7 @@ class DataFlow:
         signal.signal(signal.SIGTERM, __sigterm_handler)
 
         # Actual save loop
+
         while True:
             rec_data = conn.recv()
             outfile.writelines(str(rec_data)+',\n')
@@ -175,17 +176,21 @@ class DataFlow:
     #           signal linking 
     def _run(self):
         signal.signal(signal.SIGINT, self._kill)
-        if self.save_data:
-            self.child_processes['save'].start()
-        if self.live_plot:
-            self.child_processes['plot'].start()
 
-        self.child_processes['data_0'].start()
+        for p in self.child_processes.values():
+            p.start()
 
-    def pause(self):
+        #if self.save_data:
+        #    self.child_processes['save'].start()
+        #if self.live_plot:
+        #    self.child_processes['plot'].start()
+
+        #self.child_processes['data_0'].start()
+
+    def stop_start(self):
         pass
-    def resume(self):
-        pass
+
+
     #   @breif: cleanup method for sigkill intterupt
     def _kill(self, _signo, _stack_frame):
         for p in self.child_processes.values():
