@@ -2,3 +2,9 @@ spidev==3.6
 PyAudio==0.2.12
 RPi.GPIO==0.7.0
 smbus==1.1.post2
+librosa
+progressbar2
+requests
+torch
+torchaudio
+

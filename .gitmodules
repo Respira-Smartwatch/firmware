@@ -1,0 +1,3 @@
+[submodule "Models/speech-emotion-classifier"]
+	path = Models/speech-emotion-classifier
+	url = git@github.com:Respira-Smartwatch/speech-emotion-classifier.git

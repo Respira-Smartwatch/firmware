@@ -1,15 +1,17 @@
 import pyaudio
 import wave
 import numpy as np
+import sys
+import struct
 
-class Mics:
-
-    def __init__(self):
-
+class AudioDriver:
+    def __init__(self, sample_rate_Hz: int = 16_000, n_mics: int = 1):
+        # One stereo mic is considered a single channel
+        self.byte_order = sys.byteorder
+        self.channels = n_mics
+        self.sample_rate = sample_rate_Hz
         self.p = pyaudio.PyAudio()
-
         self.device_ID = self._get_device_id()
-    
 
     def _get_device_id(self):
         info = self.p.get_host_api_info_by_index(0)
@@ -20,10 +22,9 @@ class Mics:
                 if 'seeed' in self.p.get_device_info_by_host_api_device_index(0, i).get('name'):
                     return i
             else:
-                print(f"Output Device id {i} - {self.p.get_device_info_by_host_api_device_index(0,i).get('name')}")
+                print(f"Output Device id {i} - {self.p.get_device_info_by_host_api_device_index(0, i).get('name')}")
 
-
-    #   @breif: internal function that handles the recording function
+    #   @brief: internal function that handles the recording function
     #   @params:    outfile: string to store the output filename
     #               fs: Sampling rate of the file - default 16000Hz
     #               length: length (in seconds) of the sample recording
@@ -32,59 +33,49 @@ class Mics:
     #               chunk:  size of the recording chunks
     #               w:      width of the respeaker?
     #   @retval:    None
-    def _record(self, outfile: str = "output.wav", 
-                     fs: int = 16000, 
-                     length: float = 5.0,
-                     stereo: bool = True, 
-                     mono_channel: int=0,
-                     chunk: int = 1024, 
-                     w: int = 2):
+    def __capture(self, length: float = 5.0, stereo: bool = False):
+        mono_channel = 0
+        chunk_size = 1024
+        window = 2
+        #stream_format = self.p.get_format_from_width(1)
+        stream_format = pyaudio.paFloat32
 
-        stream = self.p.open(rate = fs,
-                             format=self.p.get_format_from_width(w),
-                             channels=2,
-                             input=True,
+        stream = self.p.open(rate=self.sample_rate, format=stream_format, channels=self.channels, input=True,
                              input_device_index=self.device_ID)
 
-        print("* recording")
-
+        print(f"* Recording {length}s of audio...")
         frames = []
+        for i in range(0, int(self.sample_rate / chunk_size*length)):
+            data = stream.read(chunk_size)
 
-        if stereo:
-            for i in range(0, int(fs / chunk*length)):
-                data = stream.read(chunk)
-                frames.append(data)
+            if stereo:
+                data = np.frombuffer(data, dtype=np.int16)[mono_channel::2].tobytes()
 
-        else:
-            for i in range(0, int(fs / chunk*length)):
-                data = stream.read(chunk)
-                a = np.frombuffer(data, dtype=np.int16)[mono_channel::2]
-                frames.append(a.tobytes())
+            frames.append(data)
 
-
-        print("* done recording")
-
+        print("* Done recording")
         stream.stop_stream()
         stream.close()
+        return frames
+
+    def record(self, outfile: str = "output.wav", length: float = 5.0, stereo: bool = False):
+        frames = self.__capture(length, stereo)
 
         wf = wave.open(outfile, 'wb')
         wf.setnchannels(2 if stereo else 1)
-        wf.setsampwidth(self.p.get_sample_size(self.p.get_format_from_width(w)))
-        wf.setframerate(fs)
+        wf.setsampwidth(self.p.get_sample_size(self.p.get_format_from_width(2)))
+        wf.setframerate(self.sample_rate)
         wf.writeframes(b''.join(frames))
         wf.close()
 
-    # Will return instantaneous samples
-    def record_single(self):
-        pass
-
-    # simplified method to call record for stereo mode
-    def record_stereo(self, outfile: str="output.wav", length: float=5.0, fs: int=16000):
-        self._record(outfile=outfile, length=length, fs=fs, stereo=True)
-
     # simplified method to call record for mono mode
-    def record_mono(self, outfile: str="output.wav", length: float=5.0, fs: int=16000):
-        self._record(outfile=outfile, length=length, fs=fs, stereo=False)
+    def get_sample(self, length: float = 5.0):
+        frames = self.__capture(length)
+        frames = b''.join(frames)
+        
+        n_floats = int(len(frames)/4)
+        data = struct.unpack(f"{n_floats}f", frames)
+        return data
 
     def play(self, infile: str, chunk: int=1024):
         wf = wave.open(infile, 'rb')
@@ -104,16 +95,9 @@ class Mics:
         stream.close()
 
     # cleanup the pyaudio instance
-    def cleanup(self):
+    def __del__(self):
         self.p.terminate()
 
-
-
-
-
-
-if __name__ == "__main__":
-    m = Mics()
-    m.record_stereo(outfile="test.wav")
-    m.play(infile="test.wav")
-    m.cleanup()
+    # simplified method to call record for mono mode
+    def record_mono(self, outfile: str="output.wav", length: float=5.0, fs: int=16000):
+        self._record(outfile=outfile, length=length, stereo=False)
