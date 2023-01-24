@@ -28,4 +28,4 @@ if __name__ == "__main__":
     gsr = GSRDriver()
 
     for i in range(10):
-        print(gsr.read())
+        print(gsr.read_once())

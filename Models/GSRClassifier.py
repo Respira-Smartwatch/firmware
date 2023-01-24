@@ -14,6 +14,6 @@ class GSRClassifier:
     # TODO: Fix this once Model has been updated
     def predict(self):
         data = self.gsr.get_sample()
-        out = self.model.CVX_List(data)
+        out = self.model.CVX_list(data)
         print(out)
         return out
