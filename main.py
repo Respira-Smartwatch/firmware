@@ -1,5 +1,7 @@
 import serial
-from Models import SpeechEmotionClassifier, GSRClassifier
+import sys
+#from Models import SpeechEmotionClassifier, GSRClassifier
+from Models import GSRClassifier
 
 _ser = None
 
@@ -11,7 +13,6 @@ def push_to_tty(*args) -> bool:
                                  baudrate=9600,
                                  parity=serial.PARITY_NONE,
                                  stopbits=serial.STOPBITS_ONE,
-                                 bytesize=serial.EIGHTBITS,
                                  bytesize=serial.EIGHTBITS,
                                  timeout=1)
         except not _ser.is_open:
@@ -29,7 +30,8 @@ def push_to_tty(*args) -> bool:
     
 
 def main(plotting=False):
-    audio_classifier = SpeechEmotionClassifier()
+
+    #audio_classifier = SpeechEmotionClassifier() if run_voice else None
     gsr_classifier = GSRClassifier()
 
     # completely arbitrary value that will need to be 
@@ -41,7 +43,8 @@ def main(plotting=False):
 
         emotion = None
         if anxiety_level >= gsr_gating_threshold:
-            emotion = audio_classifier.predict()
+            #emotion = audio_classifier.predict()
+            pass
         
         print(f"Anxiety Level as given by GSR: {anxiety_level} / {gsr_gating_threshold}")
         if emotion:
