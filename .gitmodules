@@ -1,3 +1,7 @@
 [submodule "Models/speech-emotion-classifier"]
 	path = Models/speech-emotion-classifier
 	url = git@github.com:Respira-Smartwatch/speech-emotion-classifier.git
+
+[submodule "Models/eda-classifier"]
+	path = Models/eda-classifier
+	url = https://github.com/Respira-Smartwatch/eda-classifier.git
