@@ -44,7 +44,6 @@ def main(plotting=False):
             emotion = audio_classifier.predict()
         
         print(f"Anxiety Level as given by GSR: {anxiety_level} / {gsr_gating_threshold}")
-        
         if emotion:
             print(f"Emotion as given by SE Classifier: {emotion}")
 
