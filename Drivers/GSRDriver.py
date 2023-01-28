@@ -1,5 +1,6 @@
 import smbus
 
+
 class GSRDriver:
     def __init__(self, f_s=256):
         self.channel = 1
@@ -12,24 +13,24 @@ class GSRDriver:
             print("NO Device Found / Connection Error")
             exit(1)
 
-
     def _connect(self):
         try:
             return self.bus.read_byte_data(self.address, 1)
         except:
             return 0
-    
-    #TODO: Currently does not regulate rate : FIX THIS
+
+    # TODO: Currently does not regulate rate : FIX THIS
     def read_once(self):
         try:
             return self.bus.read_byte_data(self.address, 1)
         except OSError:
             self.error_cnt -= 1
             return self.read_once() if self.error_cnt else -1
-    
+
     def get_sample(self):
         return [self.read_once() for _ in range(self.sample_rate)]
-    
+
+
 if __name__ == "__main__":
     gsr = GSRDriver()
 

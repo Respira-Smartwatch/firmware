@@ -1,28 +1,26 @@
+import numpy as np
 import sys
-import torch
 
 sys.path.insert(0, "./Models/speech-emotion-classifier/src")
 
 from Drivers.AudioDriver import AudioDriver
 from Respira import FeatureExtractor, EmotionClassifier
 
+
 class SpeechEmotionClassifier:
     def __init__(self):
-        self.feature_extractor = FeatureExtractor()
         self.model = EmotionClassifier("./Models/speech-emotion-classifier/results/respira-emoc.bin")
         self.audio = AudioDriver()
 
     def predict(self):
-        samples = torch.tensor([self.audio.get_sample()])
+        samples = self.audio.get_sample()
 
-        features = self.feature_extractor.from_samples(samples)
-        logits = self.model(features)
+        emission = FeatureExtractor.from_samples(samples, 16000)
+        emission = np.hstack((emission["mfcc"], emission["chroma"], emission["mel"]))
 
-        logits = torch.mean(logits, dim=0).tolist()
-        max_logit = logits.index(max(logits))
+        prediction, probabilities = self.model([emission])
 
-        categories = ["neutral", "calm", "happy", "sad", "angry", "fearful", "disgust", "surprise"]
+        category = ["neutral", "calm", "happy", "sad", "angry", "fearful", "disgust", "surprise"][prediction[0]]
+        probability = max(probabilities[0]) * 100
 
-        print(f"Probabilities:\n{categories}\n{logits}")
-        print(f"Prediction: {categories[max_logit]}")
-
+        print(f"{prediction} ({probability} %)")

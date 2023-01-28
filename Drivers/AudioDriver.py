@@ -4,12 +4,13 @@ import numpy as np
 import sys
 import struct
 
+
 class AudioDriver:
-    def __init__(self, sample_rate_Hz: int = 16_000, n_mics: int = 1):
+    def __init__(self, sample_rate_hz: int = 16_000, n_mics: int = 1):
         # One stereo mic is considered a single channel
         self.byte_order = sys.byteorder
         self.channels = n_mics
-        self.sample_rate = sample_rate_Hz
+        self.sample_rate = sample_rate_hz
         self.p = pyaudio.PyAudio()
         self.device_ID = self._get_device_id()
 
@@ -37,7 +38,7 @@ class AudioDriver:
         mono_channel = 0
         chunk_size = 1024
         window = 2
-        #stream_format = self.p.get_format_from_width(1)
+        # stream_format = self.p.get_format_from_width(1)
         stream_format = pyaudio.paFloat32
 
         stream = self.p.open(rate=self.sample_rate, format=stream_format, channels=self.channels, input=True,
@@ -45,7 +46,7 @@ class AudioDriver:
 
         print(f"* Recording {length}s of audio...")
         frames = []
-        for i in range(0, int(self.sample_rate / chunk_size*length)):
+        for i in range(0, int(self.sample_rate / chunk_size * length)):
             data = stream.read(chunk_size)
 
             if stereo:
@@ -72,19 +73,19 @@ class AudioDriver:
     def get_sample(self, length: float = 5.0):
         frames = self.__capture(length)
         frames = b''.join(frames)
-        
-        n_floats = int(len(frames)/4)
-        data = struct.unpack(f"{n_floats}f", frames)
-        return data
 
-    def play(self, infile: str, chunk: int=1024):
+        n_floats = int(len(frames) / 4)
+        data = struct.unpack(f"{n_floats}f", frames)
+        return np.array(data)
+
+    def play(self, infile: str, chunk: int = 1024):
         wf = wave.open(infile, 'rb')
 
-        stream = self.p.open(format = self.p.get_format_from_width(wf.getsampwidth()),
-                             channels = wf.getnchannels(),
-                             rate = wf.getframerate(),
-                             output = True,
-                             output_device_index = self.device_ID)
+        stream = self.p.open(format=self.p.get_format_from_width(wf.getsampwidth()),
+                             channels=wf.getnchannels(),
+                             rate=wf.getframerate(),
+                             output=True,
+                             output_device_index=self.device_ID)
 
         data = wf.readframes(chunk)
 
@@ -97,7 +98,3 @@ class AudioDriver:
     # cleanup the pyaudio instance
     def __del__(self):
         self.p.terminate()
-
-    # simplified method to call record for mono mode
-    def record_mono(self, outfile: str="output.wav", length: float=5.0, fs: int=16000):
-        self._record(outfile=outfile, length=length, stereo=False)
