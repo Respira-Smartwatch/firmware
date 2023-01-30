@@ -21,11 +21,13 @@ class GSRDriver:
 
     # TODO: Currently does not regulate rate : FIX THIS
     def read_once(self):
-        try:
-            return self.bus.read_byte_data(self.address, 1)
-        except OSError:
-            self.error_cnt -= 1
-            return self.read_once() if self.error_cnt else -1
+        while self.error_cnt > 0:
+            try:
+                return self.bus.read_byte_data(self.address, 1)
+            except OSError:
+                self.error_cnt -= 1
+                continue
+            print("TOO MANY ERRORS")
 
     def get_sample(self):
         return [self.read_once() for _ in range(self.sample_rate)]
