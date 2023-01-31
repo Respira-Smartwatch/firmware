@@ -2,8 +2,18 @@ import serial
 import sys
 #from Models import SpeechEmotionClassifier, GSRClassifier
 from Models import GSRClassifier
+import random
+import time
 
 _ser = None
+
+# ONLY HERE INCASE GSR ISNT CONNECTED
+class r:
+    def __init__(self):
+        pass
+
+    def predict(self):
+        return random.randint(1,100)
 
 def push_to_tty(*args) -> bool:
     global _ser
@@ -18,13 +28,18 @@ def push_to_tty(*args) -> bool:
         except not _ser.is_open:
             print("ERROR: SERIAL PORT UNABLE TO OPEN!")
             return False
-
-    for data in args:
-        try:
-            _ser.write(data.to_bytes(1, 'little'))
-        except serial.SerialTimeoutException: 
-            print("Serial Timeout while Writing...")
-            return False
+    
+    data_lst = [str(x) for x in args]
+    data_str = (',').join(data_lst)
+    data_str += ('\r\n')
+    _ser.write(data_str.encode())
+    #for data in args:
+    #    try:
+    #        #_ser.write(data.to_bytes(1, 'little'))
+    #        _ser.write(str(data).encode())
+    #    except serial.SerialTimeoutException: 
+    #        print("Serial Timeout while Writing...")
+    #        return False
     
     return True
     
@@ -32,7 +47,14 @@ def push_to_tty(*args) -> bool:
 def main(plotting=False):
 
     #audio_classifier = SpeechEmotionClassifier()
-    gsr_classifier = GSRClassifier()
+    try:
+        gsr_classifier = GSRClassifier()    
+    except:
+        gsr_classifier = r()
+        print("WARNING!! __ !! __ !!:\nGSR SENSOR NOT CONNECTED")
+        time.sleep(1)
+        print("UTILIZING RANDOM NUMBERS INSTEAD OF DATA!!!")
+        time.sleep(.25)
 
     # completely arbitrary value that will need to be 
     # Set experimentally:
@@ -60,4 +82,4 @@ def main(plotting=False):
     
 
 if __name__ == "__main__":
-    main()
+    main(plotting=True)
