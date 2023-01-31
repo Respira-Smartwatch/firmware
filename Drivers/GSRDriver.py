@@ -1,5 +1,6 @@
 import smbus
 
+import time
 
 class GSRDriver:
     def __init__(self, f_s=256):
@@ -7,7 +8,6 @@ class GSRDriver:
         self.address = 0x8
         self.bus = smbus.SMBus(self.channel)
         self.sample_rate = f_s
-        self.error_cnt = 10
 
         if not self._connect():
             print("NO Device Found / Connection Error")
@@ -19,22 +19,56 @@ class GSRDriver:
         except:
             return 0
 
-    # TODO: Currently does not regulate rate : FIX THIS
     def read_once(self):
-        while self.error_cnt > 0:
-            try:
-                return self.bus.read_byte_data(self.address, 1)
-            except OSError:
-                self.error_cnt -= 1
-                continue
-            print("TOO MANY ERRORS")
+        try:
+            return self.bus.read_byte_data(self.address, 1)
+        except OSError:
+            return -25
 
     def get_sample(self):
         return [self.read_once() for _ in range(self.sample_rate)]
 
+    def get_sample2(self):
+        return [self.bus.read_byte_data(self.address, 1) for _ in range(self.sample_rate)]
+
+
 
 if __name__ == "__main__":
     gsr = GSRDriver()
+    errors = 0
+    number_tests=10000
+    s_time = time.perf_counter()
+    for i in range(number_tests):
+        n = gsr.read_once()
+        if n == -25:
+            errors += 1
+    e_time = time.perf_counter()
+    t = (e_time - s_time)/number_tests
 
-    for i in range(10):
-        print(gsr.read_once())
+    s_time2 = time.perf_counter()
+    x = gsr.get_sample()
+    e_time2 = time.perf_counter()
+    t2 = (e_time2 - s_time2)/gsr.sample_rate
+
+    s_time3 = time.perf_counter()
+    x1 = gsr.get_sample2()
+    e_time3 = time.perf_counter()
+    t3 = (e_time3 - s_time3)/gsr.sample_rate
+
+    print(f"Total errors = {errors}/{number_tests}")
+
+    print("FOR SAMPLE ONCE IN LOOP: ----------------------")
+    print(f"Total time = {e_time - s_time}")
+    print(f"Average time per sample = {t}")
+    print(f"Average frequency = {1/t}Hz")
+    print("\n\n")
+    print("FOR GET SAMPLE: ------------------------------")
+    print(f"Total time = {e_time2 - s_time2}")
+    print(f"Average time per sample = {t2}")
+    print(f"Average frequency = {1/t2}Hz")
+    print("\n\n")
+    print("FOR GET SAMPLE2: ------------------------------")
+    print(f"Total time = {e_time3 - s_time3}")
+    print(f"Average time per sample = {t3}")
+    print(f"Average frequency = {1/t3}Hz")
+
