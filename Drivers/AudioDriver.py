@@ -6,65 +6,59 @@ import struct
 
 
 class AudioDriver:
-    def __init__(self, sample_rate_hz: int = 16_000, n_mics: int = 1):
-        # One stereo mic is considered a single channel
-        self.byte_order = sys.byteorder
-        self.channels = n_mics
-        self.sample_rate = sample_rate_hz
+    def __init__(self, sample_rate_hz: int = 16_000):
         self.p = pyaudio.PyAudio()
         self.device_ID = self._get_device_id()
 
+        self.sample_rate = sample_rate_hz
+        self.format = pyaudio.paInt16
+
     def _get_device_id(self):
         info = self.p.get_host_api_info_by_index(0)
-        numdevices = info.get('deviceCount')
 
-        for i in range(0, numdevices):
+        n_devices = info.get('deviceCount')
+
+        for i in range(0, n_devices):
             if (self.p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-                if 'seeed' in self.p.get_device_info_by_host_api_device_index(0, i).get('name'):
+                print("Input Device id ", i, " - ", self.p.get_device_info_by_host_api_device_index(0, i).get('name'))
+
+                if "seeed" in self.p.get_device_info_by_host_api_device_index(0, i).get('name'):
                     return i
+
             else:
-                print(f"Output Device id {i} - {self.p.get_device_info_by_host_api_device_index(0, i).get('name')}")
+                print("Output Device id ", i, " - ", self.p.get_device_info_by_host_api_device_index(0, i).get('name'))
 
-    #   @brief: internal function that handles the recording function
-    #   @params:    outfile: string to store the output filename
-    #               fs: Sampling rate of the file - default 16000Hz
-    #               length: length (in seconds) of the sample recording
-    #               stereo: True if recording with both channels, false if mono
-    #               mono_channel: channel to select if recording mono
-    #               chunk:  size of the recording chunks
-    #               w:      width of the respeaker?
-    #   @retval:    None
-    def __capture(self, length: float = 5.0, stereo: bool = False):
-        mono_channel = 0
-        chunk_size = 1024
-        window = 2
-        # stream_format = self.p.get_format_from_width(1)
-        stream_format = pyaudio.paFloat32
+        return -1
+    
+    def __capture(self, length: float = 5.0):
+        stream = self.p.open(
+                rate=self.sample_rate,
+                format=self.format,
+                channels=2,
+                input=True,
+                input_device_index=self.device_ID
+                )
 
-        stream = self.p.open(rate=self.sample_rate, format=stream_format, channels=self.channels, input=True,
-                             input_device_index=self.device_ID)
-
-        print(f"* Recording {length}s of audio...")
+        print(f"* Recording {length}s")
         frames = []
-        for i in range(0, int(self.sample_rate / chunk_size * length)):
-            data = stream.read(chunk_size)
 
-            if stereo:
-                data = np.frombuffer(data, dtype=np.int16)[mono_channel::2].tobytes()
+        for i in range(int(self.sample_rate / 1024 * length)):
+            data = stream.read(1024, exception_on_overflow=False)
+            a = np.fromstring(data,dtype=np.int16)[0::2]
+            frames.append(a.tostring())
 
-            frames.append(data)
-
-        print("* Done recording")
+        print("* Done")
         stream.stop_stream()
         stream.close()
+
         return frames
 
-    def record(self, outfile: str = "output.wav", length: float = 5.0, stereo: bool = False):
-        frames = self.__capture(length, stereo)
+    def record(self, outfile: str = "output.wav", length: float = 5.0):
+        frames = self.__capture(length)
 
         wf = wave.open(outfile, 'wb')
-        wf.setnchannels(2 if stereo else 1)
-        wf.setsampwidth(self.p.get_sample_size(self.p.get_format_from_width(2)))
+        wf.setnchannels(1)
+        wf.setsampwidth(self.p.get_sample_size(self.format))
         wf.setframerate(self.sample_rate)
         wf.writeframes(b''.join(frames))
         wf.close()
@@ -74,9 +68,15 @@ class AudioDriver:
         frames = self.__capture(length)
         frames = b''.join(frames)
 
-        n_floats = int(len(frames) / 4)
-        data = struct.unpack(f"{n_floats}f", frames)
-        return np.array(data)
+        n_ints = int(len(frames) / 2)
+        int_data = struct.unpack(f"{n_ints * 'h'}", frames)
+
+        float_data = np.zeros(n_ints)
+        for i, num in enumerate(int_data):
+            float_val = num / 32768.0
+            float_data[i] = float_val
+
+        return float_data
 
     def play(self, infile: str, chunk: int = 1024):
         wf = wave.open(infile, 'rb')

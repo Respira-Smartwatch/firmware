@@ -1,2 +1,3 @@
 from .GSRClassifier import GSRClassifier
-#from .SpeechEmotionClassifier import SpeechEmotionClassifier
+from .SpeechEmotionClassifier import SpeechEmotionClassifier
+
