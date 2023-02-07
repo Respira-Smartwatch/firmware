@@ -1,4 +1,8 @@
-spidev==3.6
-PyAudio==0.2.12
-RPi.GPIO==0.7.0
-smbus==1.1.post2
+numpy==1.23.5
+pyaudio
+smbus
+spidev
+
+#RPi.GPIO
+#pyserial
+

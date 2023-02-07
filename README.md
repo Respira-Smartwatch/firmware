@@ -1,24 +1,17 @@
-#firmware
+# Respira Firmware
+This repository contains the firmware for the development prototype of the
+Respira Smartwatch.
 
-A repository for firmware developed for the Raspberry Pi prototype of Respira
+## Preparing the Raspberry Pi
+Assuming `git` is already installed, please ensure Python and Pip are present
+on the system. Next, use the provided Makefile to install remaining depdencies.
 
-## Using this file
-   In this file there is included a `setup` directory, which holds shell scripts for setting
-   up the raspberry pi with all required modules and firmware to run the ReSpeaker hat.
-   in the `ReSpeaker_Drivers` directory several python drivers have been placed to handle IO with
-   the respeaker board.
-   the best place to start is running the setup scripts. 
-### Setup 
-	
-   The `setup` directory contains scripts to do important raspberry pi setup. 
+```shell
+$ sudo apt install python3-pip
+$ make setup
+```
 
-   __"seeed.sh"__ : a script that will install git, and pull the seeed firmware onto the board,
-                    it will install this firmware, and perform a reboot. 
-                    After this is complete, run `arecord -l` and confirm that the seeed card 
-		    is being detected correctly.
-
-   __"py_setup.sh"__: a script that installs pip, and installs requirements from requirements.txt
-
+## Repository Structure
 ### ReSpeaker\_Drivers
 
    This folder condtains modules for using the ReSpeaker unit
