@@ -12,15 +12,18 @@ class SpeechEmotionClassifier:
         self.model = EmotionClassifier("./Models/speech-emotion-classifier/results/respira-emoc.bin")
         self.audio = AudioDriver()
 
-    def predict(self):
+    def predict(self) -> dict:
         samples = self.audio.get_sample()
 
         emission = FeatureExtractor.from_samples(samples, 16000)
         emission = np.hstack((emission["mfcc"], emission["chroma"], emission["mel"]))
 
         prediction, probabilities = self.model([emission])
+        result = {
+            "happy": probabilities[0] * 100.0,
+            "sad": probabilities[1] * 100.0,
+            "disgust": probabilities[2] * 100.0,
+            "surprise": probabilities[3] * 100.0
+        }
 
-        category = ["neutral", "calm", "happy", "sad", "angry", "fearful", "disgust", "surprise"][prediction[0]]
-        probability = max(probabilities[0]) * 100
-
-        print(f"{prediction} ({probability} %)")
+        return result
