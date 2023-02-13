@@ -24,3 +24,4 @@ class SpeechEmotionClassifier:
         probability = max(probabilities[0]) * 100
 
         print(f"{prediction} ({probability} %)")
+	return [category, probability]

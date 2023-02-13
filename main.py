@@ -1,5 +1,6 @@
 from Models import GSRClassifier, SpeechEmotionClassifier
 from Drivers import APA102 
+import data
 
 if __name__ == "__main__":
     # Models
@@ -20,6 +21,6 @@ if __name__ == "__main__":
     speech_duration_s = 5.0
     gsr_gating_threshold = 25
 
-    gsr_pred = gsr_model.predict()
-    speech_model.predict()
-
+    #gsr_pred = gsr_model.predict()
+    #speech_model.predict()
+    datacollection()

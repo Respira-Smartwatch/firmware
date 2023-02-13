@@ -16,4 +16,4 @@ class GSRClassifier:
         data = self.gsr.get_sample()
         phasic_av, tonic_av = self.model.predict(data)
         print(phasic_av, tonic_av)
-        return tonic_av
+        return [phasic_av, tonic_av]
