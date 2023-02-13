@@ -4,8 +4,8 @@ import data
 
 if __name__ == "__main__":
     # Models
-    gsr_model = GSRClassifier()
-    speech_model = SpeechEmotionClassifier()
+    #gsr_model = GSRClassifier()
+    #speech_model = SpeechEmotionClassifier()
 
     # LED (should be wrapped in new class)
     activity_led = 0
