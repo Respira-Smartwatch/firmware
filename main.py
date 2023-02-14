@@ -1,25 +1,45 @@
+from .data import datacollection
+from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
-from Drivers import APA102 
+
+
+def capture_speech(led0, model):
+    led0.speech()
+    pred = model.predict()
+    print(pred)
+
+    return pred
+
+
+def capture_gsr(led0, model):
+    led0.gsr()
+    pred = model.predict()
+    print(pred)
+
+    return pred
 
 if __name__ == "__main__":
     # Models
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
 
-    # LED (should be wrapped in new class)
-    activity_led = 0
-    gsr_led = 1
-    speech_led = 2
-    led = APA102(3)
-    led.clear_strip()
-
-    led.set_pixel(activity_led, 0, 255, 0, 5)
-    led.show()
+    # LED
+    led = LEDArray()
 
     # Model parameters
     speech_duration_s = 5.0
     gsr_gating_threshold = 25
 
-    gsr_pred = gsr_model.predict()
-    speech_model.predict()
+    while True:
+        led.idle()
+        cmd = input()
 
+        if cmd == "speech":
+            _ = capture_speech(led, speech_model)
+
+        elif cmd == "gsr":
+            _ = capture_gsr(led, gsr_model)
+
+        elif cmd == "data_collect":
+            subject_name = input("Please enter subject name: ")
+            datacollection(gsr_model, speech_model, subject_name)
