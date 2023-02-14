@@ -41,4 +41,5 @@ if __name__ == "__main__":
             _ = capture_gsr(led, gsr_model)
 
         elif cmd == "data_collect":
-            datacollection()
+            subject_name = input("Please enter subject name: ")
+            datacollection(gsr_model, speech_model, subject_name)

@@ -1,137 +1,136 @@
 import csv
+import datetime
 import time
-from Models import GSRClassifier, SpeechEmotionClassifier
-from Drivers import APA102
 
-def datacollection():
-   gsr_model = GSRClassifier()
-   speech_model = SpeechEmotionClassifier()
-   led = APA102(3)
-   led.clear_strip()
-   led.set_pixel(0, 255, 255, 255, 4) #Turn light to white
-   led.show()
 
-   with open('data_subject_0.csv', 'w', newline='') as file:
-      writer = csv.writer(file)
+def datacollection(gsr_model, speech_model, subject_name):
+    timestamp = str(datetime.datetime.now()).split(" ")[0]
+    filename = f"respira_{subject_name}_{timestamp}.csv"
 
-      # Beginning of Video
-      time.sleep(8)
+    with open(filename, "w", newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["GSR Phasic",
+                         "GSR Tonic",
+                         "Speech Happy",
+                         "Speech Sad",
+                         "Speech Disgust",
+                         "Speech Surprise",
+                         "Stress rating"])
 
-      # First Baseline Test
-      name = input("Enter your name: ")
-      writer.writerow([name])
-      writer.writerow(["GSR Phasic", "GSR Tonic", "Speech", "Speech Probability", "Stress Level"])
-      writer.writerow(['First Baseline Test'])
-      for i in range(2):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict() #Change to actual output 
-         speech, prob = speech_model.predict() #Change to actual output
-         writer.writerow([phasic, tonic, speech, prob])
-      print("End of Baseline Test")
+        # Beginning of Video
+        time.sleep(8)
 
-      # Reading time
-      time.sleep(8) # 0:38 - 0:46
+        # First Baseline Test
+        print("Baseline Test")
+        for i in range(2):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [0])
+        print("End of Baseline Test")
 
-      # Expiration Test #1
-      writer.writerow(['Expiration Test #1'])
-      for i in range(4):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob])
-      print("End of Expiration Test")
+        # Reading time
+        time.sleep(8)  # 0:38 - 0:46
 
-      # Reading time
-      time.sleep(10) # 1:46 - 1:56
+        # Expiration Test #1
+        print("Expiration Test #1")
+        for i in range(4):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [0])
+        print("End of Expiration Test")
 
-      # Rest #1
-      writer.writerow(['Rest #1'])
-      stress = input("Enter stress level rating 0-5: ")
-      writer.writerow([None,None,None,None,stress])
-      for i in range(2):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob, stress])
-      print("End of Rest #1")
+        # Reading time
+        time.sleep(10)  # 1:46 - 1:56
 
-      # Reading time
-      time.sleep(8) # 2:26 - 2:34
+        # Rest #1
+        print("Rest #1")
+        stress = input("Enter stress level rating 0-5: ")
 
-      # Expiration Test #2
-      writer.writerow(['Expiration Test #2'])
-      for i in range(4):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob])
-      print("End of Expiration #2 Test")
+        for i in range(2):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [stress])
+        print("End of Rest #1")
 
-      # Reading time
-      time.sleep(8) # 3:34 - 3:42
+        # Reading time
+        time.sleep(8)  # 2:26 - 2:34
 
-      # Rest #2
-      writer.writerow(['Rest #2'])
-      stress = input("Enter stress level rating 0-5: ")
-      writer.writerow([None,None,None,None,stress])
-      for i in range(2):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob, stress])
-      print("End of Rest #2")
+        # Expiration Test #2
+        print("Expiration Test #2")
+        for i in range(4):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [0])
+        print("End of Expiration #2 Test")
 
-      # Reading time
-      time.sleep(8) # 4:12 - 4:20
+        # Reading time
+        time.sleep(8)  # 3:34 - 3:42
 
-      # Video Test #3
-      writer.writerow(['Video Test #3'])
-      for i in range(10):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob])
-      print("End of Video Test")
+        # Rest #2
+        print("Rest #2")
+        stress = input("Enter stress level rating 0-5: ")
 
-      # Reading time
-      time.sleep(9) # 6:50 - 6:59
+        for i in range(2):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [stress])
+        print("End of Rest #2")
 
-      # Rest #3
-      writer.writerow(['Rest #3'])
-      stress = input("Enter stress level rating 0-5: ")
-      writer.writerow([None,None,None,stress])
-      for i in range(2):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob, stress])
-      print("End of Rest #3")
+        # Reading time
+        time.sleep(8)  # 4:12 - 4:20
 
-      # Reading time
-      time.sleep(6) # 7:29 - 7:35
+        # Video Test #3
+        print("Video Test #3")
+        for i in range(10):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [0])
+        print("End of Video Test")
 
-      # Reciting Test #4
-      writer.writerow(['Reciting Test #4'])
-      for i in range(2):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob])
-      print("End of Reciting Test #4")
+        # Reading time
+        time.sleep(9)  # 6:50 - 6:59
 
-      # Reading time
-      time.sleep(5) # 8:05 - 8:10
+        # Rest #3
+        print("Rest #3")
+        stress = input("Enter stress level rating 0-5: ")
 
-      # Rest #4
-      writer.writerow(['Rest #4'])
-      stress = input("Enter stress level rating 0-5: ")
-      writer.writerow([None,None,None,None,stress])
-      for i in range(2):
-         time.sleep(15)
-         phasic, tonic = gsr_model.predict()
-         speech, prob = speech_model.predict()
-         writer.writerow([phasic, tonic, speech, prob, stress])
-      print("End of Rest #4")
-   file.close()
-   return
+        for i in range(2):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [stress])
+        print("End of Rest #3")
 
+        # Reading time
+        time.sleep(6)  # 7:29 - 7:35
+
+        # Reciting Test #4
+        print("Reciting Test #4")
+        for i in range(2):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [0])
+        print("End of Reciting Test #4")
+
+        # Reading time
+        time.sleep(5)  # 8:05 - 8:10
+
+        # Rest #4
+        print("Rest #4")
+        stress = input("Enter stress level rating 0-5: ")
+
+        for i in range(2):
+            time.sleep(15)
+            phasic, tonic = gsr_model.predict()
+            prob = list(speech_model.predict().values())
+            writer.writerow([phasic, tonic] + prob + [stress])
+        print("End of Rest #4")
+
+    print("End of data collection protocol")
