@@ -1,5 +1,6 @@
-from Models import GSRClassifier, SpeechEmotionClassifier
+from .data import datacollection
 from Drivers import LEDArray
+from Models import GSRClassifier, SpeechEmotionClassifier
 
 
 def capture_speech(led0, model):
@@ -16,7 +17,6 @@ def capture_gsr(led0, model):
     print(pred)
 
     return pred
-
 
 if __name__ == "__main__":
     # Models
@@ -41,15 +41,4 @@ if __name__ == "__main__":
             _ = capture_gsr(led, gsr_model)
 
         elif cmd == "data_collect":
-            # Baseline
-            # Expiration (Slow)
-            # Rest
-            # Expiration (Fast)
-            # Rest
-            # Stimulation (Video)
-            # Rest
-            # Stimulation (Math)
-            # Rest
-            # Recitation
-            # Rest
-            pass
+            datacollection()
