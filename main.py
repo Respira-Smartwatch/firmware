@@ -1,7 +1,7 @@
-from .data import datacollection
+from data import datacollection
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
-
+from timeit import default_timer as timer
 
 def capture_speech(led0, model):
     led0.speech()
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Models
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
-
+    
     # LED
     led = LEDArray()
 
@@ -32,9 +32,15 @@ if __name__ == "__main__":
 
     while True:
         led.idle()
-        cmd = input()
+        cmd = input("> ")
 
-        if cmd == "speech":
+        if cmd == "help" or cmd == "":
+            print("Available commands:")
+            print("speech: take a speech sample")
+            print("gsr: take a gsr sample")
+            print("data_collect: run data collection")
+
+        elif cmd == "speech":
             _ = capture_speech(led, speech_model)
 
         elif cmd == "gsr":
@@ -43,3 +49,27 @@ if __name__ == "__main__":
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
             datacollection(gsr_model, speech_model, subject_name)
+
+        elif cmd == "profile":
+            gsr_time = 0
+            for i in range(20):
+                start = timer()
+                gsr_model.predict()
+                end = timer()
+
+                print(end - start, "sec")
+                gsr_time += (end-start)
+
+            print("Average GSR:", gsr_time / 20, "sec")
+
+            speech_time = 0
+            for i in range(20):
+                start = timer()
+                speech_model.predict()
+                end = timer()
+
+                print(end - start, "sec")
+                speech_time += (end-start)
+
+            print("Average speech:", speech_time / 20, "sec")
+

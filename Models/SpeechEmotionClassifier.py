@@ -19,6 +19,8 @@ class SpeechEmotionClassifier:
         emission = np.hstack((emission["mfcc"], emission["chroma"], emission["mel"]))
 
         prediction, probabilities = self.model([emission])
+        probabilities = probabilities[0]
+
         result = {
             "happy": probabilities[0] * 100.0,
             "sad": probabilities[1] * 100.0,

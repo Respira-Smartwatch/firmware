@@ -1,9 +1,9 @@
 from .apa102 import APA102
 
 class LEDArray:
-    def __int__(self, led: str):
+    def __init__(self, led: str):
         self.idx = 0
-        self.driver = APA102(1)
+        self.driver = APA102(3)
 
     def idle(self):
         """In the idle state, the LED is green"""
