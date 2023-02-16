@@ -22,7 +22,7 @@ class GSRDriver:
         try:
             return self.bus.read_byte_data(self.address, 1)
         except OSError:
-            return -25
+            return None
     
     def tick(self):
         t = time.time()
@@ -36,7 +36,10 @@ class GSRDriver:
         i = 0
         while i < (self.sample_rate * seconds):
             time.sleep(next(g))
-            sample += self.read_once(),
+            s = self.read_once()
+            if type(s) == None:
+                s = sample[i-1]
+            sample += s,
             i += 1
 
 if __name__ == "__main__":
