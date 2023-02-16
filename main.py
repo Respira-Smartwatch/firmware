@@ -10,7 +10,6 @@ def capture_speech(led0, model):
 
     return pred
 
-
 def capture_gsr(led0, model):
     led0.gsr()
     pred = model.predict()
