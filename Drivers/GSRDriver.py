@@ -41,6 +41,7 @@ class GSRDriver:
                 s = sample[i-1]
             sample += s,
             i += 1
+        return sample
 
 if __name__ == "__main__":
     gsr = GSRDriver()
