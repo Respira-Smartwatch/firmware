@@ -2,10 +2,23 @@ import csv
 import datetime
 import time
 
+_GSR_MODEL = None
+_SPEECH_MODEL = None
+
+def run_prediction(gsr: bool, speech: bool)
+    global _GSR_MODEL, _SPEECH_MODEL
+    phasic, tonic = _GSR_MODEL.predict() if gsr else 0,0
+    prob = list(_SPEECH_MODEL.predict().values()) if speech else [0, 0, 0, 0]
+    return phasic, tonic, prob
+
 
 def datacollection(gsr_model, speech_model, subject_name):
     timestamp = str(datetime.datetime.now()).split(" ")[0]
     filename = f"respira_{subject_name}_{timestamp}.csv"
+
+    global _GSR_MODEL, _SPEECH_MODEL
+    _GSR_MODEL = gsr_model
+    _SPEECH_MODEL = speech_model
 
     with open(filename, "w", newline='') as file:
         writer = csv.writer(file)
@@ -24,8 +37,7 @@ def datacollection(gsr_model, speech_model, subject_name):
         print("Baseline Test")
         for i in range(2):
             time.sleep(10) # Wait 10s since recording speech blocks for 5s
-            phasic, tonic = gsr_model.predict()
-            prob = list(speech_model.predict().values())
+            phasic, tonic, prob = run_prediction(True, True)
             writer.writerow([phasic, tonic] + prob + [0])
         print("End of Baseline Test")
 
@@ -36,8 +48,7 @@ def datacollection(gsr_model, speech_model, subject_name):
         print("Expiration Test #1")
         for i in range(4):
             time.sleep(15)
-            phasic, tonic = gsr_model.predict()
-            prob = [0, 0, 0, 0]
+            phasic, tonic, prob = run_prediction(True, False)
             writer.writerow([phasic, tonic] + prob + [0])
         print("End of Expiration Test")
 
@@ -50,8 +61,7 @@ def datacollection(gsr_model, speech_model, subject_name):
 
         for i in range(2):
             time.sleep(15)
-            phasic, tonic = gsr_model.predict()
-            prob = [0, 0, 0, 0]
+            phasic, tonic, prob = run_prediction(True, False)
             writer.writerow([phasic, tonic] + prob + [stress])
         print("End of Rest #1")
 
@@ -62,8 +72,7 @@ def datacollection(gsr_model, speech_model, subject_name):
         print("Expiration Test #2")
         for i in range(4):
             time.sleep(15)
-            phasic, tonic = gsr_model.predict()
-            prob = [0, 0, 0, 0]
+            phasic, tonic, prob = run_prediction(True, False)
             writer.writerow([phasic, tonic] + prob + [0])
         print("End of Expiration #2 Test")
 
@@ -76,8 +85,7 @@ def datacollection(gsr_model, speech_model, subject_name):
 
         for i in range(2):
             time.sleep(15)
-            phasic, tonic = gsr_model.predict()
-            prob = [0, 0, 0, 0]
+            phasic, tonic, prob = run_prediction(True, False)
             writer.writerow([phasic, tonic] + prob + [stress])
         print("End of Rest #2")
 
@@ -88,8 +96,7 @@ def datacollection(gsr_model, speech_model, subject_name):
         print("Video Test #3")
         for i in range(10):
             time.sleep(15)
-            phasic, tonic = gsr_model.predict()
-            prob = [0, 0, 0, 0]
+            phasic, tonic, prob = run_prediction(True, False)
             writer.writerow([phasic, tonic] + prob + [0])
         print("End of Video Test")
 
@@ -102,8 +109,7 @@ def datacollection(gsr_model, speech_model, subject_name):
 
         for i in range(2):
             time.sleep(15)
-            phasic, tonic = gsr_model.predict()
-            prob = [0, 0, 0, 0]
+            phasic, tonic, prob = run_prediction(True, False)
             writer.writerow([phasic, tonic] + prob + [stress])
         print("End of Rest #3")
 
@@ -114,8 +120,7 @@ def datacollection(gsr_model, speech_model, subject_name):
         print("Reciting Test #4")
         for i in range(2):
             time.sleep(10)  # Wait 10s since recording speech blocks for 5s
-            phasic, tonic = gsr_model.predict()
-            prob = list(speech_model.predict().values())
+            phasic, tonic, prob = run_prediction(True, True)
             writer.writerow([phasic, tonic] + prob + [0])
         print("End of Reciting Test #4")
 
@@ -128,8 +133,7 @@ def datacollection(gsr_model, speech_model, subject_name):
 
         for i in range(2):
             time.sleep(15)
-            phasic, tonic = gsr_model.predict()
-            prob = [0, 0, 0, 0]
+            phasic, tonic, prob = run_prediction(True, False)
             writer.writerow([phasic, tonic] + prob + [stress])
         print("End of Rest #4")
 
