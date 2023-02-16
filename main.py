@@ -38,6 +38,7 @@ if __name__ == "__main__":
             print("speech: take a speech sample")
             print("gsr: take a gsr sample")
             print("data_collect: run data collection")
+            print("data_debug: run data collection no input req")
 
         elif cmd == "speech":
             _ = capture_speech(led, speech_model)
@@ -48,6 +49,11 @@ if __name__ == "__main__":
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
             datacollection(gsr_model, speech_model, subject_name)
+        
+        elif cmd == "data_debug":
+            subject_name = input("Please enter subject name: ")
+            datacollection(gsr_model, speech_model, subject_name, with_input=False)
+
 
         elif cmd == "profile":
             gsr_time = 0
