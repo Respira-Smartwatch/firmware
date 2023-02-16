@@ -1,5 +1,4 @@
 import smbus
-
 import time
 
 class GSRDriver:
@@ -24,14 +23,21 @@ class GSRDriver:
             return self.bus.read_byte_data(self.address, 1)
         except OSError:
             return -25
+    
+    def tick(self):
+        t = time.time()
+        while True:
+            t += 1/self.sample_rate
+            yield max(t-time.time(), 0)
 
-    def get_sample(self):
-        return [self.read_once() for _ in range(self.sample_rate)]
-
-    def get_sample2(self):
-        return [self.bus.read_byte_data(self.address, 1) for _ in range(self.sample_rate)]
-
-
+    def get_sample(self, seconds=1):
+        g = self.tick()
+        sample = []
+        i = 0
+        while i < (self.sample_rate * seconds):
+            time.sleep(next(g))
+            sample += self.read_once(),
+            i += 1
 
 if __name__ == "__main__":
     gsr = GSRDriver()
