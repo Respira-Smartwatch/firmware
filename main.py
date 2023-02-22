@@ -23,7 +23,7 @@ if __name__ == "__main__":
     speech_model = SpeechEmotionClassifier()
     
     # LED
-    led = LEDArray()
+    led = LEDArray(1)
 
     # Model parameters
     speech_duration_s = 5.0
@@ -39,12 +39,13 @@ if __name__ == "__main__":
             print("gsr: take a gsr sample")
             print("data_collect: run data collection")
             print("data_debug: run data collection no input req")
+            print("exit: exit program")
 
         elif cmd == "speech":
             _ = capture_speech(led, speech_model)
 
         elif cmd == "gsr":
-            _ = capture_gsr(led, gsr_model)
+            _  = capture_gsr(led, gsr_model)
 
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
@@ -52,7 +53,7 @@ if __name__ == "__main__":
         
         elif cmd == "data_debug":
             subject_name = input("Please enter subject name: ")
-            datacollection(gsr_model, speech_model, subject_name, with_input=False)
+            datacollection(gsr_model, speech_model, subject_name, debug=True)
 
 
         elif cmd == "profile":
@@ -60,6 +61,7 @@ if __name__ == "__main__":
             for i in range(20):
                 start = timer()
                 gsr_model.predict()
+
                 end = timer()
 
                 print(end - start, "sec")
@@ -77,4 +79,7 @@ if __name__ == "__main__":
                 speech_time += (end-start)
 
             print("Average speech:", speech_time / 20, "sec")
+        
+        elif cmd == "exit":
+            exit(0)
 
