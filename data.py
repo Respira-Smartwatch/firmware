@@ -21,7 +21,7 @@ def run_prediction(data: dict, test_name: str,
         print("NO GLOBALS DEFINED")
         exit(1)
 
-    led = LEDArray(1)
+    led = LEDArray()
     led.idle()
 
     data[test_name] = {
@@ -230,7 +230,7 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
         json_dumps_str = json.dumps(data, indent=4)
         print(json_dumps_str, file=fout)
 
-    debug_time += sum(t)
+    debug_time += t
 
     print("End of data collection protocol")
     print(f"Total Time to complete: {time.time() - s}s")
