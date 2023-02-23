@@ -29,4 +29,3 @@ class SpeechEmotionClassifier:
         }
 
         return result
-

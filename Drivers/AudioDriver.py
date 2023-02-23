@@ -39,7 +39,7 @@ class AudioDriver:
                 input_device_index=self.device_ID
                 )
 
-        print(f"* Recording {length}s")
+        #print(f"* Recording {length}s")
         frames = []
 
         for i in range(int(self.sample_rate / 1024 * length)):
@@ -47,7 +47,7 @@ class AudioDriver:
             a = np.fromstring(data,dtype=np.int16)[0::2]
             frames.append(a.tostring())
 
-        print("* Done")
+        #print("* Done")
         stream.stop_stream()
         stream.close()
 

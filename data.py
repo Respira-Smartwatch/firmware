@@ -3,23 +3,26 @@ import datetime
 import json
 import time
 
+from Drivers import LEDArray
+
 _GSR_MODEL = None
 _SPEECH_MODEL = None
 _FILE_WRITER = None
 
 
-def run_prediction(data_dict: dict, test_name: str, 
-                   gsr: bool,       speech: bool, time_s: float):
+def run_prediction(data: dict, test_name: str, 
+                   gsr: bool, speech: bool, 
+                   time_s: float, num_runs: int, 
+                   debug: bool=False):
 
-    s = time.time()
     global _GSR_MODEL, _SPEECH_MODEL
 
     if not (_GSR_MODEL and _SPEECH_MODEL):
         print("NO GLOBALS DEFINED")
         exit(1)
 
-    phasic, tonic = _GSR_MODEL.predict() if gsr else 0,0
-    prob = list(_SPEECH_MODEL.predict().values()) if speech else [0, 0, 0, 0]
+    led = LEDArray()
+    led.idle()
 
     data[test_name] = {
         "gsr_phasic": [],
@@ -30,22 +33,35 @@ def run_prediction(data_dict: dict, test_name: str,
         "speech_surprise": [],
         "stress_rating": 0
     }
-   
-    data[test_name]["gsr_phasic"].append(phasic)
-    data[test_name]["gsr_tonic"].append(tonic)
-    data[test_name]["speech_happy"].append(prob[0])
-    data[test_name]["speech_sad"].append(prob[1])
-    data[test_name]["speech_disgust"].append(prob[2])
-    data[test_name]["speech_rating"].append(prob[3])
-    
-    t = time.time() - s
-    if t < time_s:
-        time.sleep(time_s - t)
+    t_time = 0
 
-    return phasic, tonic, prob, time.time()-s
+    for _ in range(num_runs):
+        s = time.time()
+
+        led.gsr()
+        phasic, tonic = _GSR_MODEL.predict() if gsr else (0,0)
+
+        led.speech()
+        prob = list(_SPEECH_MODEL.predict().values()) if speech else [0, 0, 0, 0]
+
+        led.idle()
+        data[test_name]["gsr_phasic"].append(phasic)
+        data[test_name]["gsr_tonic"].append(tonic)
+        data[test_name]["speech_happy"].append(prob[0])
+        data[test_name]["speech_sad"].append(prob[1])
+        data[test_name]["speech_disgust"].append(prob[2])
+        data[test_name]["speech_surprise"].append(prob[3])
+
+        t = time.time() - s
+
+        if t < time_s and not debug:
+            time.sleep(time_s - t)
+        t_time += time.time()-s
+
+    return t_time
 
 
-def datacollection(gsr_model, speech_model, subject_name, with_input=True):
+def datacollection(gsr_model, speech_model, subject_name, debug=False):
     global _GSR_MODEL, _SPEECH_MODEL
     _GSR_MODEL = gsr_model
     _SPEECH_MODEL = speech_model
@@ -58,7 +74,7 @@ def datacollection(gsr_model, speech_model, subject_name, with_input=True):
 
     data = {
         "subject": subject_name,
-        "date": str(time)
+        "date": timestamp
     }
 
     debug_time = t = s-time.time()
@@ -88,110 +104,122 @@ def datacollection(gsr_model, speech_model, subject_name, with_input=True):
     # 18. Rest #4: 2 readings (15s each) gsr
     
     # Beginning of Video -------------------------------------
-    time.sleep(8-t)
+    if not debug:
+        time.sleep(8-t)
     print(f"Intro Time: {time.time() - s}") # DEBUG
 
     # First Baseline Test ------------------------------------
     print("Baseline Test")
 
-    t = [] # DEBUG
-    for _ in range(2):
-        t += run_prediction(data, "baseline", True, True, 15),
+    t = 0 # DEBUG
+    t += run_prediction(data, "baseline", True, True, 15, 2, debug)
     
     print(f"End of Baseline Test (time: {t}s)")
 
     # Reading time ------------------------------------------
-    time.sleep(8)# 0:38 - 0:46
+    if not debug:
+        time.sleep(8)# 0:38 - 0:46
 
     # Expiration Test #1 ------------------------------------
     print("Expiration Test #1")
 
-    for _ in range(4):
-        t += run_prediction(data, "expiration1", True, False, 15),
+    t += run_prediction(data, "expiration1", True, False, 15, 4, debug)
 
     print(f"End of Expiration Test (time: {t}s)")
 
     # Reading time ------------------------------------------
-    time.sleep(10)  # 1:46 - 1:56
-    stress = input("Enter stress level rating 0-5: ") if with_input else -1
+    if not debug:
+        time.sleep(10)  # 1:46 - 1:56
+        stress = input("Enter stress level rating 0-5: ")
+    else:
+        stress = -1
+        
     data["expiration1"]["stress_rating"] = int(stress)
 
     # Rest #1 -----------------------------------------------
     print("Rest #1")
-    for _ in range(2):
-        t += run_prediction(data, "rest1", True, False, 15),
+    t += run_prediction(data, "rest1", True, False, 15, 2, debug)
 
     print(f"End of Rest #1 (time: {t}s)")
 
     # Reading time ------------------------------------------
-    time.sleep(8)  # 2:26 - 2:34
+    if not debug:
+        time.sleep(8)  # 2:26 - 2:34
 
     # Expiration Test #2 ------------------------------------
     print("Expiration Test #2")
 
-    for _ in range(4):
-        t += run_prediction(data, "expiration2", True, False, 15),
+    t += run_prediction(data, "expiration2", True, False, 15, 4, debug)
 
     print(f"End of Expiration #2 Test (time: {t}s)")
 
     # Reading time ------------------------------------------
-    time.sleep(8)  # 3:34 - 3:42
-    stress = input("Enter stress level rating 0-5: ") if with_input else -1
+    if not debug:
+        time.sleep(8)  # 3:34 - 3:42
+        stress = input("Enter stress level rating 0-5: ")
+    else:
+        stress = -1
+        
     data["expiration2"]["stress_rating"] = int(stress)
 
     # Rest #2 -----------------------------------------------
     print("Rest #2")
 
-    for _ in range(2):
-        t += run_prediction(data, "rest2", True, False, 15),
+    t += run_prediction(data, "rest2", True, False, 15, 2, debug)
 
     print(f"End of Rest #2 (time: {t}s)")
 
     # Reading time ------------------------------------------
-    time.sleep(8)  # 4:12 - 4:20
+    if not debug:
+        time.sleep(8)  # 4:12 - 4:20
 
     # Video Test #3 -----------------------------------------
     print("Video Test #3")
 
-    for _ in range(10):
-        t += run_prediction(data, "video", True, False, 15),
+    t += run_prediction(data, "video", True, False, 15, 10, debug)
 
     print(f"End of Video Test. (time: {t})")
 
     # Reading time -----------------------------------------
-    time.sleep(9)  # 6:50 - 6:59
-    stress = input("Enter stress level rating 0-5: ") if with_input else -1
+    if not debug:
+        time.sleep(9)  # 6:50 - 6:59
+        stress = input("Enter stress level rating 0-5: ")
+    else:
+        stress = -1
+
     data["video"]["stress_rating"] = int(stress)
 
     # Rest #3 ----------------------------------------------
     print("Rest #3")
 
-    for i in range(2):
-        t += run_prediction(data, "rest3", True, False, 15),
+    t += run_prediction(data, "rest3", True, False, 15, 2, debug)
 
     print(f"End of Rest #3 (time: {t}s)")
 
     # Reading time -----------------------------------------
-    time.sleep(6)  # 7:29 - 7:35
+    if not debug:
+        time.sleep(6)  # 7:29 - 7:35
 
     # Reciting Test #4 -------------------------------------
     print("Reciting Test #4")
 
-    for _ in range(2):
-        t += run_prediction(data, "recitation", True, True, 15),
+    t += run_prediction(data, "recitation", True, True, 15, 2, debug)
 
     print(f"End of Reciting Test #4 (time: {t}s)")
 
     # Reading time -----------------------------------------
-    time.sleep(5)  # 8:05 - 8:10
-    stress = input("Enter stress level rating 0-5: ") if with_input else -1
+    if not debug:
+        time.sleep(5)  # 8:05 - 8:10
+        stress = input("Enter stress level rating 0-5: ")
+    else: 
+        stress = -1
+
     data["recitation"]["stress_rating"] = int(stress)
 
     # Rest #4 ----------------------------------------------
     print("Rest #4")
 
-    for _ in range(2):
-        t += run_prediction(data, "rest4", True, False, 15),
+    t += run_prediction(data, "rest4", True, False, 15, 2, debug)
 
     print(f"End of Rest #4 (time: {t}s)")
 
@@ -202,7 +230,7 @@ def datacollection(gsr_model, speech_model, subject_name, with_input=True):
         json_dumps_str = json.dumps(data, indent=4)
         print(json_dumps_str, file=fout)
 
-    debug_time += sum(t)
+    debug_time += t
 
     print("End of data collection protocol")
     print(f"Total Time to complete: {time.time() - s}s")
