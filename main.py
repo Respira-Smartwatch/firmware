@@ -76,6 +76,13 @@ if __name__ == "__main__":
                 speech_time += (end-start)
 
             print("Average speech:", speech_time / 20, "sec")
-        
+
+        elif cmd == "led":
+            rgba_vals = input("Please enter RGBA values: ").split(" ")
+            r = int(rgba_vals[0])
+            g = int(rgba_vals[1])
+            b = int(rgba_vals[2])
+            a = int(rgba_vals[3])
+
         elif cmd == "exit":
             exit(0)
