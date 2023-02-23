@@ -19,7 +19,7 @@ if __name__ == "__main__":
     speech_model = SpeechEmotionClassifier()
     
     # LED
-    led = LEDArray(1)
+    led = LEDArray()
 
     # Model parameters
     speech_duration_s = 5.0

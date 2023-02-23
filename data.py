@@ -3,6 +3,8 @@ import datetime
 import json
 import time
 
+from Drivers import LEDArray
+
 _GSR_MODEL = None
 _SPEECH_MODEL = None
 _FILE_WRITER = None
@@ -19,6 +21,9 @@ def run_prediction(data: dict, test_name: str,
         print("NO GLOBALS DEFINED")
         exit(1)
 
+    led = LEDArray(1)
+    led.idle()
+
     data[test_name] = {
         "gsr_phasic": [],
         "gsr_tonic": [],
@@ -33,9 +38,13 @@ def run_prediction(data: dict, test_name: str,
     for _ in range(num_runs):
         s = time.time()
 
+        led.gsr()
         phasic, tonic = _GSR_MODEL.predict() if gsr else (0,0)
+
+        led.speech()
         prob = list(_SPEECH_MODEL.predict().values()) if speech else [0, 0, 0, 0]
 
+        led.idle()
         data[test_name]["gsr_phasic"].append(phasic)
         data[test_name]["gsr_tonic"].append(tonic)
         data[test_name]["speech_happy"].append(prob[0])
