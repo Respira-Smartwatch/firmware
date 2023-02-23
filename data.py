@@ -140,7 +140,7 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
     # Expiration Test #2 ------------------------------------
     print("Expiration Test #2")
 
-    t += run_prediction(data, "expiration2", True, False, 15, 4, debug),
+    t += run_prediction(data, "expiration2", True, False, 15, 4, debug)
 
     print(f"End of Expiration #2 Test (time: {t}s)")
 
