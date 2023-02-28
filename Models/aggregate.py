@@ -1,25 +1,37 @@
 import GSRClassifier
 import SpeechEmotionClassifier
 
+
+# Get GSR Precition
+# Get Speech Prediction
+# Combine these in some meaningful way to guage total stress
+# GSR gives instant stress *(physiological)
+# Speech gives psychological stress
+
 class Aggregate:
-	def __init__(self):
+	def __init__(self, threshold: int=15):
 		self.gsr = GSRClassifier()
 		self.speech = SpeechEmotionClassifier()
+		self.threshold = threshold
 
-	def datafromgsr(self): 
-		#reads data from eda classifier
-		gsrdata = self.gsr.predict()
-		gsrtonic = gsrdata[1]
-		gsrphasic = gsrdata[0]
+	def predict(self):
+		tonic, phasic = self.gsr.predict()
 
-	def datafromspeech(self):
-		speechdata = self.speech.predict()
+		if tonic > self.threshold:
+			speech_data = self.speech.predict()
 	
-	def combinedata(self):
+		# PSEUDO CODE
+		stress_value = self.tonic + speech_data
 
-		#combines data from eda and gsr
+		self.LED(stress_value)
+		return stress_value
+		
 
-	def LED(self):
+	def LED(self, gsr_stress: float, speech_stress: list):
+
+		# DO SOMETHING BASED ON THOSE VALUES
+
+
 		#LED Meaning
 		#All LED change hue as Phasic level increases
 		#Happy:
@@ -30,14 +42,15 @@ class Aggregate:
 			#LED1: off, LED2: off, LED3: on
 		#Suprised:
 			#LED1: off, LED2: on, LED3: off
+		pass
 
-	def storedata():
-		#stores gsr data, speech data, and aggregate data to SD card on pi
 
-threshold = 15
-if (Aggregate.datafromgsr.gsrtonic() > threshold):
+
+if __name__ == "__main__":
+	threshold = 15
+	if (Aggregate.datafromgsr.gsrtonic() > threshold):
+		pass
 	#combinedata
-
 
 ##old
 		# data = json.load(open('respira_Max_2023-02-22.json', 'r'))
