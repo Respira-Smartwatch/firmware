@@ -1,4 +1,3 @@
-#import json
 import GSRClassifier
 import SpeechEmotionClassifier
 
@@ -17,6 +16,7 @@ class Aggregate:
 		speechdata = self.speech.predict()
 	
 	def combinedata(self):
+
 		#combines data from eda and gsr
 
 	def LED(self):
@@ -30,6 +30,9 @@ class Aggregate:
 			#LED1: off, LED2: off, LED3: on
 		#Suprised:
 			#LED1: off, LED2: on, LED3: off
+
+	def storedata():
+		#stores gsr data, speech data, and aggregate data to SD card on pi
 
 threshold = 15
 if (Aggregate.datafromgsr.gsrtonic() > threshold):
