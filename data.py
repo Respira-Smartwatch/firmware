@@ -33,8 +33,11 @@ def run_prediction(data: dict, test_name: str,
         "speech_surprise": [],
         "stress_rating": 0
     }
+
     t_time = 0
 
+    # Each run lasts for 'time_s' amount of time right now
+    #    
     for _ in range(num_runs):
         s = time.time()
 
@@ -64,6 +67,7 @@ def run_prediction(data: dict, test_name: str,
 
         if t < time_s and not debug:
             time.sleep(time_s - t)
+
         t_time += time.time()-s
 
     return t_time
