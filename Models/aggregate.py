@@ -16,22 +16,21 @@ class Aggregate:
 
 	def predict(self):
 		tonic, phasic = self.gsr.predict()
-
+		
+		#look at different ways to interpret tonic level
 		if tonic > self.threshold:
 			speech_data = self.speech.predict()
 	
-		print(speech_data)
-		
 		#combine gsr and speech values
-		#stress_value = self.tonic + speech_data
-
+		stress_value = self.tonic + speech_data[0]
+			
 		#turn on LEDs based on new value
 		self.LED(tonic, speech_data, stress_value)
 		return stress_value
 		
 
 	def LED(self, gsr_stress: float, speech_stress: list, combines_value: float):
-
+		
 		# DO SOMETHING BASED ON THOSE VALUES
 
 
@@ -50,11 +49,12 @@ class Aggregate:
 
 
 if __name__ == "__main__":
-	threshold = 15
-	if (Aggregate.datafromgsr.gsrtonic() > threshold):
-		pass
-	#combinedata
-
+	print(Aggregate.predict())
+	
+	
+	
+	
+	
 ##old
 		# data = json.load(open('respira_Max_2023-02-22.json', 'r'))
 		# phases = ['baseline', 'expiration1', 'rest1', 'expiration2', 'rest2', 'video', 'rest3', 'recitation', 'rest4']
