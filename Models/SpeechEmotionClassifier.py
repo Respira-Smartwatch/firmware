@@ -12,8 +12,8 @@ class SpeechEmotionClassifier:
         self.model = EmotionClassifier("./Models/speech-emotion-classifier/results/respira-emoc.bin")
         self.audio = AudioDriver()
 
-    def predict(self) -> dict:
-        samples = self.audio.get_sample()
+    def predict(self, sample_length_sec: float = 5.0) -> dict:
+        samples = self.audio.get_sample(sample_length_sec)
 
         emission = FeatureExtractor.from_samples(samples, 16000)
         emission = np.hstack((emission["mfcc"], emission["chroma"], emission["mel"]))

@@ -39,18 +39,26 @@ def run_prediction(data: dict, test_name: str,
         s = time.time()
 
         led.gsr()
-        phasic, tonic = _GSR_MODEL.predict() if gsr else (0,0)
+        for i in range(5):
+            phasic, tonic = _GSR_MODEL.predict() if gsr else (-1,-1)
+            data[test_name]["gsr_phasic"].append(phasic)
+            data[test_name]["gsr_tonic"].append(tonic)
 
         led.speech()
-        prob = list(_SPEECH_MODEL.predict().values()) if speech else [0, 0, 0, 0]
+        for i in range(5):
+            prob = list(_SPEECH_MODEL.predict(1).values()) if speech else [-1, -1, -1, -1]
+            data[test_name]["speech_happy"].append(prob[0])
+            data[test_name]["speech_sad"].append(prob[1])
+            data[test_name]["speech_disgust"].append(prob[2])
+            data[test_name]["speech_surprise"].append(prob[3])
+
+        led.gsr()
+        for i in range(5):
+            phasic, tonic = _GSR_MODEL.predict() if gsr else (0, 0)
+            data[test_name]["gsr_phasic"].append(phasic)
+            data[test_name]["gsr_tonic"].append(tonic)
 
         led.idle()
-        data[test_name]["gsr_phasic"].append(phasic)
-        data[test_name]["gsr_tonic"].append(tonic)
-        data[test_name]["speech_happy"].append(prob[0])
-        data[test_name]["speech_sad"].append(prob[1])
-        data[test_name]["speech_disgust"].append(prob[2])
-        data[test_name]["speech_surprise"].append(prob[3])
 
         t = time.time() - s
 
