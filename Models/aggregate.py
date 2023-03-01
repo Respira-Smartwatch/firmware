@@ -20,14 +20,17 @@ class Aggregate:
 		if tonic > self.threshold:
 			speech_data = self.speech.predict()
 	
-		# PSEUDO CODE
-		stress_value = self.tonic + speech_data
+		print(speech_data)
+		
+		#combine gsr and speech values
+		#stress_value = self.tonic + speech_data
 
-		self.LED(stress_value)
+		#turn on LEDs based on new value
+		self.LED(tonic, speech_data, stress_value)
 		return stress_value
 		
 
-	def LED(self, gsr_stress: float, speech_stress: list):
+	def LED(self, gsr_stress: float, speech_stress: list, combines_value: float):
 
 		# DO SOMETHING BASED ON THOSE VALUES
 
