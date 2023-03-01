@@ -41,6 +41,7 @@ class GSRDriver:
                 s = sample[i-1]
             sample += s,
             i += 1
+        return sample
 
 if __name__ == "__main__":
     gsr = GSRDriver()
@@ -64,20 +65,19 @@ if __name__ == "__main__":
     e_time3 = time.perf_counter()
     t3 = (e_time3 - s_time3)/gsr.sample_rate
 
-    print(f"Total errors = {errors}/{number_tests}")
+    #print(f"Total errors = {errors}/{number_tests}")
 
-    print("FOR SAMPLE ONCE IN LOOP: ----------------------")
-    print(f"Total time = {e_time - s_time}")
-    print(f"Average time per sample = {t}")
-    print(f"Average frequency = {1/t}Hz")
-    print("\n\n")
-    print("FOR GET SAMPLE: ------------------------------")
-    print(f"Total time = {e_time2 - s_time2}")
-    print(f"Average time per sample = {t2}")
-    print(f"Average frequency = {1/t2}Hz")
-    print("\n\n")
-    print("FOR GET SAMPLE2: ------------------------------")
-    print(f"Total time = {e_time3 - s_time3}")
-    print(f"Average time per sample = {t3}")
-    print(f"Average frequency = {1/t3}Hz")
-
+    #print("FOR SAMPLE ONCE IN LOOP: ----------------------")
+    #print(f"Total time = {e_time - s_time}")
+    #print(f"Average time per sample = {t}")
+    #print(f"Average frequency = {1/t}Hz")
+    #print("\n\n")
+    #print("FOR GET SAMPLE: ------------------------------")
+    #print(f"Total time = {e_time2 - s_time2}")
+    #print(f"Average time per sample = {t2}")
+    #print(f"Average frequency = {1/t2}Hz")
+    #print("\n\n")
+    #print("FOR GET SAMPLE2: ------------------------------")
+    #print(f"Total time = {e_time3 - s_time3}")
+    #print(f"Average time per sample = {t3}")
+    #print(f"Average frequency = {1/t3}Hz")

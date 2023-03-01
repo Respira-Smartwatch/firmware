@@ -1,9 +1,9 @@
 from .apa102 import APA102
 
 class LEDArray:
-    def __int__(self, led: str):
+    def __init__(self):
         self.idx = 0
-        self.driver = APA102(1)
+        self.driver = APA102(3)
 
     def idle(self):
         """In the idle state, the LED is green"""
@@ -16,8 +16,8 @@ class LEDArray:
         self.driver.show()
 
     def gsr(self):
-        """While sampling GSR, the LED is white"""
-        self.driver.set_pixel(self.idx, 0, 0, 0, 5)
+        """While sampling GSR, the LED is purple"""
+        self.driver.set_pixel(self.idx, 255, 0, 255, 5)
         self.driver.show()
 
     def result(self):
