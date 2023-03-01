@@ -7,13 +7,23 @@ from Drivers import LEDArray
 
 _GSR_MODEL = None
 _SPEECH_MODEL = None
-_FILE_WRITER = None
+_TTY_BUS = serial.Serial("/dev/ttyS0",
+                            baudrate=9600,
+                            parity=serial.PARITY_NONE,
+                            stopbits=serial.STOPBITS_ONE,
+                            bytesize=serial.EIGHTBITS,
+                            timeout=1)
+
+def push_to_tty(values: list):
+    data = ','.join(values)
+    _TTY_BUS.write(data.to_bytes(1, 'little'))
+    return 1
 
 
 def run_prediction(data: dict, test_name: str, 
                    gsr: bool, speech: bool, 
                    time_s: float, num_runs: int, 
-                   debug: bool=False):
+                   debug: bool=False, plot_tty: bool=False):
 
     global _GSR_MODEL, _SPEECH_MODEL
 
@@ -46,6 +56,8 @@ def run_prediction(data: dict, test_name: str,
             phasic, tonic = _GSR_MODEL.predict() if gsr else (-1,-1)
             data[test_name]["gsr_phasic"].append(phasic)
             data[test_name]["gsr_tonic"].append(tonic)
+            if plot_tty:
+                push_to_tty([tonic, phasic])
 
         led.speech()
         for i in range(5):
@@ -54,12 +66,16 @@ def run_prediction(data: dict, test_name: str,
             data[test_name]["speech_sad"].append(prob[1])
             data[test_name]["speech_disgust"].append(prob[2])
             data[test_name]["speech_surprise"].append(prob[3])
+            if plot_tty:
+                push_to_tty(prob)
 
         led.gsr()
         for i in range(5):
             phasic, tonic = _GSR_MODEL.predict() if gsr else (0, 0)
             data[test_name]["gsr_phasic"].append(phasic)
             data[test_name]["gsr_tonic"].append(tonic)
+            if plot_tty:
+                push_to_tty([tonic, phasic])
 
         led.idle()
 
