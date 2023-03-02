@@ -9,20 +9,36 @@ import SpeechEmotionClassifier
 # Speech gives psychological stress
 
 class Aggregate:
-	def __init__(self, threshold: int=15):
+	def __init__(self, threshold: int=5):
 		self.gsr = GSRClassifier()
 		self.speech = SpeechEmotionClassifier()
 		self.threshold = threshold
 
-	def predict(self):
-		tonic, phasic = self.gsr.predict()
+	def predict(self, samples):
+		#average tonic and phasic to make baseline
+		#compare new values to previous baseline
+		#if new value - baseline is > threshold, then activate speech classifier
+		#both tonic and phasic have to be > threshold
+
+		ran = 0
+		psamples = 0
+		tsamples = 0
+		for s in range(samples):
+			phasic, tonic = self.gsr.predict()
+			tsamples += tonic
+			tonicbl = tonic - (tsamples / (s + 1))
+
+			#only runs speech classifier once during sampling
+			if tonic - tonicbl > self.threshold and ran == 0:
+				speech_data = self.speech.predict()
+				ran = 1
+
+
 		
-		#look at different ways to interpret tonic level
-		if tonic > self.threshold:
-			speech_data = self.speech.predict()
+		
 	
 		#combine gsr and speech values
-		stress_value = self.tonic + speech_data[0]
+		stress_value = tonic + speech_data[0]
 			
 		#turn on LEDs based on new value
 		self.LED(tonic, speech_data, stress_value)
@@ -49,7 +65,7 @@ class Aggregate:
 
 
 if __name__ == "__main__":
-	print(Aggregate.predict())
+	print(Aggregate.predict(30))
 	
 	
 	
