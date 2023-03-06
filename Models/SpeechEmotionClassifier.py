@@ -1,3 +1,5 @@
+from typing import Tuple, Dict, Union, Any
+
 import numpy as np
 import sys
 
@@ -12,7 +14,7 @@ class SpeechEmotionClassifier:
         self.model = EmotionClassifier("./Models/speech-emotion-classifier/results/respira-emoc.bin")
         self.audio = AudioDriver()
 
-    def predict(self, sample_length_sec: float = 5.0) -> dict:
+    def predict(self, sample_length_sec: float = 5.0) -> tuple[dict[str, Union[float]], Any]:
         samples = self.audio.get_sample(sample_length_sec)
 
         emission = FeatureExtractor.from_samples(samples, 16000)
@@ -28,4 +30,4 @@ class SpeechEmotionClassifier:
             "surprise": probabilities[3] * 100.0
         }
 
-        return result
+        return result, samples

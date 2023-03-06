@@ -1,4 +1,3 @@
-import copy
 import datetime
 import json
 import time
@@ -6,8 +5,6 @@ import time
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
 
-_GSR_MODEL = None
-_SPEECH_MODEL = None
 _TTY_BUS = serial.Serial("/dev/ttyS0", baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=1)
 
 def push_to_tty(values: list):
@@ -19,244 +16,249 @@ class DataCollection:
     def __int__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier):
         self._GSR_MODEL = gsr_model
         self._SPEECH_MODEL = speech_model
+        self.led = LEDArray()
 
-def run_prediction(data: dict, test_name: str, gsr: bool, speech: bool, time_s: float, num_runs: int,
-                   debug: bool = False, plot_tty: bool = False):
-    global _GSR_MODEL, _SPEECH_MODEL
+    def sample_gsr(self):
+        phasic, tonic = self._GSR_MODEL.predict()
+        return phasic, tonic
 
-    if not (_GSR_MODEL and _SPEECH_MODEL):
-        print("NO GLOBALS DEFINED")
-        exit(1)
+    def sample_speech(self):
+        prob, samples = self._SPEECH_MODEL.predict(2.75)
+        prob = list(prob.values())
+        samples = list(samples)
 
-    led = LEDArray()
-    led.idle()
+        return [prob[0], prob[1], prob[2], prob[3]], samples
 
-    data[test_name] = {
-        "gsr_phasic": [],
-        "gsr_tonic": [],
-        "speech_happy": [],
-        "speech_sad": [],
-        "speech_disgust": [],
-        "speech_surprise": [],
-        "stress_rating": 0
-    }
+    def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float, num_runs: int, debug: bool = False, plot_tty: bool = False):
+        self.led.idle()
 
-    t_time = 0
+        data[test_name] = {
+            "gsr_phasic": [],
+            "gsr_tonic": [],
 
-    # Each run lasts for 'time_s' amount of time right now
-    #    
-    for _ in range(num_runs):
+            "speech_happy": [],
+            "speech_sad": [],
+            "speech_disgust": [],
+            "speech_surprise": [],
+
+            "speech_samples": [],
+            "stress_rating": 0
+        }
+
+        t_time = 0.0
+
+        for _ in range(num_runs):
+            s = time.time()
+
+            self.led.gsr()
+            for i in range(5):
+                phasic, tonic = self.sample_gsr()
+                data[test_name]["gsr_phasic"].append(phasic)
+                data[test_name]["gsr_tonic"].append(tonic)
+
+                if plot_tty:
+                    push_to_tty([tonic, phasic])
+
+            self.led.speech()
+            for i in range(5):
+                prob, samples = self.sample_speech()
+                data[test_name]["speech_happy"].append(prob[0])
+                data[test_name]["speech_sad"].append(prob[1])
+                data[test_name]["speech_disgust"].append(prob[2])
+                data[test_name]["speech_surprise"].append(prob[3])
+
+                data[test_name]["speech_samples"].append(samples)
+
+                if plot_tty:
+                    push_to_tty(prob)
+
+            self.led.gsr()
+            for i in range(5):
+                phasic, tonic = self.sample_gsr()
+                data[test_name]["gsr_phasic"].append(phasic)
+                data[test_name]["gsr_tonic"].append(tonic)
+
+                if plot_tty:
+                    push_to_tty([tonic, phasic])
+
+            self.led.idle()
+
+            t = time.time() - s
+
+            if t < time_s and not debug:
+                time.sleep(time_s - t)
+
+            t_time += time.time() - s
+
+        return t_time
+
+    def datacollection(self, subject_name: str, debug=False):
         s = time.time()
+        debug_time = 0
 
-        led.gsr()
-        for i in range(5):
-            phasic, tonic = _GSR_MODEL.predict() if gsr else (-1, -1)
-            data[test_name]["gsr_phasic"].append(phasic)
-            data[test_name]["gsr_tonic"].append(tonic)
-            if plot_tty:
-                push_to_tty([tonic, phasic])
+        timestamp = str(datetime.datetime.now()).split(" ")[0]
+        filename = f"respira_{subject_name}_{timestamp}.json"
 
-        led.speech()
-        for i in range(5):
-            prob = list(_SPEECH_MODEL.predict(1).values()) if speech else [-1, -1, -1, -1]
-            data[test_name]["speech_happy"].append(prob[0])
-            data[test_name]["speech_sad"].append(prob[1])
-            data[test_name]["speech_disgust"].append(prob[2])
-            data[test_name]["speech_surprise"].append(prob[3])
-            if plot_tty:
-                push_to_tty(prob)
+        data = {
+            "subject": subject_name,
+            "date": timestamp
+        }
 
-        led.gsr()
-        for i in range(5):
-            phasic, tonic = _GSR_MODEL.predict() if gsr else (0, 0)
-            data[test_name]["gsr_phasic"].append(phasic)
-            data[test_name]["gsr_tonic"].append(tonic)
-            if plot_tty:
-                push_to_tty([tonic, phasic])
+        debug_time = t = s - time.time()
 
-        led.idle()
+        print(f"debug_time so far: {debug_time}")  # DEBUG
 
-        t = time.time() - s
+        # TEST BEGIN  ---------------------------------------------
 
-        if t < time_s and not debug:
-            time.sleep(time_s - t)
+        # Test Structure:
+        # 01. Video Beginning: (8s) rest
+        # 02. First Baseline: 2 readings (15s each), speech & gsr
+        # 03. Reading time: (8s) rest
+        # 04. Expiration test 1: 4 readings (15s each), gsr
+        # 05. Reading time: (10s) rest
+        # 06. Rest 1: 2 readings (15s each), gsr
+        # 07. Reading time: (8s) rest
+        # 08. Expiration test 2: 4 readings (15s each), gsr
+        # 09. Reading time: (8s) rest
+        # 10. Rest 2: 2 readings (15s each), gsr
+        # 11. Reading time: (8s) rest
+        # 12. Video Test #3: 10 readings (15s each), gsr
+        # 13. Reading time: (9s) rest
+        # 14. Rest 3: 2 readings (15s each), gsr
+        # 15. Reading time: (6s) rest
+        # 16. Reciting Test #4: 2 readings (15s each) speech & gsr
+        # 17. Reading time: (5s) rest
+        # 18. Rest #4: 2 readings (15s each) gsr
 
-        t_time += time.time() - s
+        # Beginning of Video -------------------------------------
+        if not debug:
+            time.sleep(8 - t)
+        print(f"Intro Time: {time.time() - s}")  # DEBUG
 
-    return t_time
+        # First Baseline Test ------------------------------------
+        print("Baseline Test")
 
+        t = 0  # DEBUG
+        t += self.run_prediction(data, "baseline", True, True, 15, 2, debug)
 
-def datacollection(gsr_model, speech_model, subject_name, debug=False):
-    global _GSR_MODEL, _SPEECH_MODEL
-    _GSR_MODEL = gsr_model
-    _SPEECH_MODEL = speech_model
+        print(f"End of Baseline Test (time: {t}s)")
 
-    s = time.time()
-    debug_time = 0
+        # Reading time ------------------------------------------
+        if not debug:
+            time.sleep(8)  # 0:38 - 0:46
 
-    timestamp = str(datetime.datetime.now()).split(" ")[0]
-    filename = f"respira_{subject_name}_{timestamp}.json"
+        # Expiration Test #1 ------------------------------------
+        print("Expiration Test #1")
 
-    data = {
-        "subject": subject_name,
-        "date": timestamp
-    }
+        t += self.run_prediction(data, "expiration1", True, False, 15, 4, debug)
 
-    debug_time = t = s - time.time()
+        print(f"End of Expiration Test (time: {t}s)")
 
-    print(f"debug_time so far: {debug_time}")  # DEBUG
+        # Reading time ------------------------------------------
+        if not debug:
+            time.sleep(10)  # 1:46 - 1:56
+            stress = input("Enter stress level rating 0-5: ")
+        else:
+            stress = -1
 
-    # TEST BEGIN  ---------------------------------------------
+        data["expiration1"]["stress_rating"] = int(stress)
 
-    # Test Structure:
-    # 01. Video Beginning: (8s) rest
-    # 02. First Baseline: 2 readings (15s each), speech & gsr
-    # 03. Reading time: (8s) rest 
-    # 04. Expiration test 1: 4 readings (15s each), gsr
-    # 05. Reading time: (10s) rest
-    # 06. Rest 1: 2 readings (15s each), gsr
-    # 07. Reading time: (8s) rest
-    # 08. Expiration test 2: 4 readings (15s each), gsr
-    # 09. Reading time: (8s) rest
-    # 10. Rest 2: 2 readings (15s each), gsr
-    # 11. Reading time: (8s) rest
-    # 12. Video Test #3: 10 readings (15s each), gsr
-    # 13. Reading time: (9s) rest
-    # 14. Rest 3: 2 readings (15s each), gsr
-    # 15. Reading time: (6s) rest
-    # 16. Reciting Test #4: 2 readings (15s each) speech & gsr
-    # 17. Reading time: (5s) rest
-    # 18. Rest #4: 2 readings (15s each) gsr
+        # Rest #1 -----------------------------------------------
+        print("Rest #1")
+        t += self.run_prediction(data, "rest1", True, False, 15, 2, debug)
 
-    # Beginning of Video -------------------------------------
-    if not debug:
-        time.sleep(8 - t)
-    print(f"Intro Time: {time.time() - s}")  # DEBUG
+        print(f"End of Rest #1 (time: {t}s)")
 
-    # First Baseline Test ------------------------------------
-    print("Baseline Test")
+        # Reading time ------------------------------------------
+        if not debug:
+            time.sleep(8)  # 2:26 - 2:34
 
-    t = 0  # DEBUG
-    t += run_prediction(data, "baseline", True, True, 15, 2, debug)
+        # Expiration Test #2 ------------------------------------
+        print("Expiration Test #2")
 
-    print(f"End of Baseline Test (time: {t}s)")
+        t += self.run_prediction(data, "expiration2", True, False, 15, 4, debug)
 
-    # Reading time ------------------------------------------
-    if not debug:
-        time.sleep(8)  # 0:38 - 0:46
+        print(f"End of Expiration #2 Test (time: {t}s)")
 
-    # Expiration Test #1 ------------------------------------
-    print("Expiration Test #1")
+        # Reading time ------------------------------------------
+        if not debug:
+            time.sleep(8)  # 3:34 - 3:42
+            stress = input("Enter stress level rating 0-5: ")
+        else:
+            stress = -1
 
-    t += run_prediction(data, "expiration1", True, False, 15, 4, debug)
+        data["expiration2"]["stress_rating"] = int(stress)
 
-    print(f"End of Expiration Test (time: {t}s)")
+        # Rest #2 -----------------------------------------------
+        print("Rest #2")
 
-    # Reading time ------------------------------------------
-    if not debug:
-        time.sleep(10)  # 1:46 - 1:56
-        stress = input("Enter stress level rating 0-5: ")
-    else:
-        stress = -1
+        t += self.run_prediction(data, "rest2", True, False, 15, 2, debug)
 
-    data["expiration1"]["stress_rating"] = int(stress)
+        print(f"End of Rest #2 (time: {t}s)")
 
-    # Rest #1 -----------------------------------------------
-    print("Rest #1")
-    t += run_prediction(data, "rest1", True, False, 15, 2, debug)
+        # Reading time ------------------------------------------
+        if not debug:
+            time.sleep(8)  # 4:12 - 4:20
 
-    print(f"End of Rest #1 (time: {t}s)")
+        # Video Test #3 -----------------------------------------
+        print("Video Test #3")
 
-    # Reading time ------------------------------------------
-    if not debug:
-        time.sleep(8)  # 2:26 - 2:34
+        t += self.run_prediction(data, "video", True, False, 15, 10, debug)
 
-    # Expiration Test #2 ------------------------------------
-    print("Expiration Test #2")
+        print(f"End of Video Test. (time: {t})")
 
-    t += run_prediction(data, "expiration2", True, False, 15, 4, debug)
+        # Reading time -----------------------------------------
+        if not debug:
+            time.sleep(9)  # 6:50 - 6:59
+            stress = input("Enter stress level rating 0-5: ")
+        else:
+            stress = -1
 
-    print(f"End of Expiration #2 Test (time: {t}s)")
+        data["video"]["stress_rating"] = int(stress)
 
-    # Reading time ------------------------------------------
-    if not debug:
-        time.sleep(8)  # 3:34 - 3:42
-        stress = input("Enter stress level rating 0-5: ")
-    else:
-        stress = -1
+        # Rest #3 ----------------------------------------------
+        print("Rest #3")
 
-    data["expiration2"]["stress_rating"] = int(stress)
+        t += self.run_prediction(data, "rest3", True, False, 15, 2, debug)
 
-    # Rest #2 -----------------------------------------------
-    print("Rest #2")
+        print(f"End of Rest #3 (time: {t}s)")
 
-    t += run_prediction(data, "rest2", True, False, 15, 2, debug)
+        # Reading time -----------------------------------------
+        if not debug:
+            time.sleep(6)  # 7:29 - 7:35
 
-    print(f"End of Rest #2 (time: {t}s)")
+        # Reciting Test #4 -------------------------------------
+        print("Reciting Test #4")
 
-    # Reading time ------------------------------------------
-    if not debug:
-        time.sleep(8)  # 4:12 - 4:20
+        t += self.run_prediction(data, "recitation", True, True, 15, 2, debug)
 
-    # Video Test #3 -----------------------------------------
-    print("Video Test #3")
+        print(f"End of Reciting Test #4 (time: {t}s)")
 
-    t += run_prediction(data, "video", True, False, 15, 10, debug)
+        # Reading time -----------------------------------------
+        if not debug:
+            time.sleep(5)  # 8:05 - 8:10
+            stress = input("Enter stress level rating 0-5: ")
+        else:
+            stress = -1
 
-    print(f"End of Video Test. (time: {t})")
+        data["recitation"]["stress_rating"] = int(stress)
 
-    # Reading time -----------------------------------------
-    if not debug:
-        time.sleep(9)  # 6:50 - 6:59
-        stress = input("Enter stress level rating 0-5: ")
-    else:
-        stress = -1
+        # Rest #4 ----------------------------------------------
+        print("Rest #4")
 
-    data["video"]["stress_rating"] = int(stress)
+        t += self.run_prediction(data, "rest4", True, False, 15, 2, debug)
 
-    # Rest #3 ----------------------------------------------
-    print("Rest #3")
+        print(f"End of Rest #4 (time: {t}s)")
 
-    t += run_prediction(data, "rest3", True, False, 15, 2, debug)
+        # TEST FINISHED ---------------------------------------!
 
-    print(f"End of Rest #3 (time: {t}s)")
+        # File writing and test end ----------------------------
+        with open(filename, 'w') as fout:
+            json_dumps_str = json.dumps(data, indent=4)
+            print(json_dumps_str, file=fout)
 
-    # Reading time -----------------------------------------
-    if not debug:
-        time.sleep(6)  # 7:29 - 7:35
+        debug_time += t
 
-    # Reciting Test #4 -------------------------------------
-    print("Reciting Test #4")
-
-    t += run_prediction(data, "recitation", True, True, 15, 2, debug)
-
-    print(f"End of Reciting Test #4 (time: {t}s)")
-
-    # Reading time -----------------------------------------
-    if not debug:
-        time.sleep(5)  # 8:05 - 8:10
-        stress = input("Enter stress level rating 0-5: ")
-    else:
-        stress = -1
-
-    data["recitation"]["stress_rating"] = int(stress)
-
-    # Rest #4 ----------------------------------------------
-    print("Rest #4")
-
-    t += run_prediction(data, "rest4", True, False, 15, 2, debug)
-
-    print(f"End of Rest #4 (time: {t}s)")
-
-    # TEST FINISHED ---------------------------------------!
-
-    # File writing and test end ----------------------------
-    with open(filename, 'w') as fout:
-        json_dumps_str = json.dumps(data, indent=4)
-        print(json_dumps_str, file=fout)
-
-    debug_time += t
-
-    print("End of data collection protocol")
-    print(f"Total Time to complete: {time.time() - s}s")
-    print(f"Total prediction time computed: {debug_time}s")
+        print("End of data collection protocol")
+        print(f"Total Time to complete: {time.time() - s}s")
+        print(f"Total prediction time computed: {debug_time}s")
