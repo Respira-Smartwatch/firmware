@@ -4,27 +4,24 @@ import json
 import time
 
 from Drivers import LEDArray
+from Models import GSRClassifier, SpeechEmotionClassifier
 
 _GSR_MODEL = None
 _SPEECH_MODEL = None
-_TTY_BUS = serial.Serial("/dev/ttyS0",
-                            baudrate=9600,
-                            parity=serial.PARITY_NONE,
-                            stopbits=serial.STOPBITS_ONE,
-                            bytesize=serial.EIGHTBITS,
-                            timeout=1)
+_TTY_BUS = serial.Serial("/dev/ttyS0", baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=1)
 
 def push_to_tty(values: list):
     data = ','.join(values)
     _TTY_BUS.write(data.to_bytes(1, 'little'))
     return 1
 
+class DataCollection:
+    def __int__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier):
+        self._GSR_MODEL = gsr_model
+        self._SPEECH_MODEL = speech_model
 
-def run_prediction(data: dict, test_name: str, 
-                   gsr: bool, speech: bool, 
-                   time_s: float, num_runs: int, 
-                   debug: bool=False, plot_tty: bool=False):
-
+def run_prediction(data: dict, test_name: str, gsr: bool, speech: bool, time_s: float, num_runs: int,
+                   debug: bool = False, plot_tty: bool = False):
     global _GSR_MODEL, _SPEECH_MODEL
 
     if not (_GSR_MODEL and _SPEECH_MODEL):
@@ -53,7 +50,7 @@ def run_prediction(data: dict, test_name: str,
 
         led.gsr()
         for i in range(5):
-            phasic, tonic = _GSR_MODEL.predict() if gsr else (-1,-1)
+            phasic, tonic = _GSR_MODEL.predict() if gsr else (-1, -1)
             data[test_name]["gsr_phasic"].append(phasic)
             data[test_name]["gsr_tonic"].append(tonic)
             if plot_tty:
@@ -84,7 +81,7 @@ def run_prediction(data: dict, test_name: str,
         if t < time_s and not debug:
             time.sleep(time_s - t)
 
-        t_time += time.time()-s
+        t_time += time.time() - s
 
     return t_time
 
@@ -95,7 +92,7 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
     _SPEECH_MODEL = speech_model
 
     s = time.time()
-    debug_time = 0 
+    debug_time = 0
 
     timestamp = str(datetime.datetime.now()).split(" ")[0]
     filename = f"respira_{subject_name}_{timestamp}.json"
@@ -105,9 +102,9 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
         "date": timestamp
     }
 
-    debug_time = t = s-time.time()
+    debug_time = t = s - time.time()
 
-    print(f"debug_time so far: {debug_time}") # DEBUG
+    print(f"debug_time so far: {debug_time}")  # DEBUG
 
     # TEST BEGIN  ---------------------------------------------
 
@@ -130,23 +127,23 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
     # 16. Reciting Test #4: 2 readings (15s each) speech & gsr
     # 17. Reading time: (5s) rest
     # 18. Rest #4: 2 readings (15s each) gsr
-    
+
     # Beginning of Video -------------------------------------
     if not debug:
-        time.sleep(8-t)
-    print(f"Intro Time: {time.time() - s}") # DEBUG
+        time.sleep(8 - t)
+    print(f"Intro Time: {time.time() - s}")  # DEBUG
 
     # First Baseline Test ------------------------------------
     print("Baseline Test")
 
-    t = 0 # DEBUG
+    t = 0  # DEBUG
     t += run_prediction(data, "baseline", True, True, 15, 2, debug)
-    
+
     print(f"End of Baseline Test (time: {t}s)")
 
     # Reading time ------------------------------------------
     if not debug:
-        time.sleep(8)# 0:38 - 0:46
+        time.sleep(8)  # 0:38 - 0:46
 
     # Expiration Test #1 ------------------------------------
     print("Expiration Test #1")
@@ -161,7 +158,7 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
         stress = input("Enter stress level rating 0-5: ")
     else:
         stress = -1
-        
+
     data["expiration1"]["stress_rating"] = int(stress)
 
     # Rest #1 -----------------------------------------------
@@ -187,7 +184,7 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
         stress = input("Enter stress level rating 0-5: ")
     else:
         stress = -1
-        
+
     data["expiration2"]["stress_rating"] = int(stress)
 
     # Rest #2 -----------------------------------------------
@@ -239,7 +236,7 @@ def datacollection(gsr_model, speech_model, subject_name, debug=False):
     if not debug:
         time.sleep(5)  # 8:05 - 8:10
         stress = input("Enter stress level rating 0-5: ")
-    else: 
+    else:
         stress = -1
 
     data["recitation"]["stress_rating"] = int(stress)
