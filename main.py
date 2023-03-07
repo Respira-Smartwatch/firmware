@@ -18,6 +18,9 @@ if __name__ == "__main__":
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
     
+    # DataCollect Instance
+    dc = DataCollection(gsr_model, speech_model)
+
     # LED
     led = LEDArray()
 
@@ -48,11 +51,11 @@ if __name__ == "__main__":
 
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
-            DataCollection(gsr_model, speech_model, subject_name)
+            dc.datacollection(subject_name)
         
         elif cmd == "data_debug":
             subject_name = input("Please enter subject name: ")
-            DataCollection(gsr_model, speech_model, subject_name, debug=True)
+            dc.datacollection(subject_name, debug=True)
 
         elif cmd == "profile":
             gsr_time = 0
