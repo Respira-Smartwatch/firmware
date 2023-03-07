@@ -1,4 +1,4 @@
-from data import datacollection
+from Routines.DataCollection import DataCollection
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
 from timeit import default_timer as timer
@@ -48,11 +48,11 @@ if __name__ == "__main__":
 
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
-            datacollection(gsr_model, speech_model, subject_name)
+            DataCollection(gsr_model, speech_model, subject_name)
         
         elif cmd == "data_debug":
             subject_name = input("Please enter subject name: ")
-            datacollection(gsr_model, speech_model, subject_name, debug=True)
+            DataCollection(gsr_model, speech_model, subject_name, debug=True)
 
         elif cmd == "profile":
             gsr_time = 0
