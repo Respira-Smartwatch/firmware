@@ -7,7 +7,6 @@ import serial
 sys.path.insert(0,"/home/pi/firmware/Drivers/")
 sys.path.insert(0,"/home/pi/firmware/Models/")
 
-
 from LEDArray import LEDArray
 import GSRClassifier
 from SpeechEmotionClassifier import SpeechEmotionClassifier
