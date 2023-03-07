@@ -3,7 +3,7 @@ import json
 import time
 import sys
 import serial
-from pychartPusher import PychartPusher  
+from .pychartPusher import PychartPusher  
 
 sys.path.insert(0,"/home/pi/firmware/Drivers/")
 sys.path.insert(0,"/home/pi/firmware/Models/")
@@ -20,7 +20,7 @@ def push_to_tty(values: list):
     return 1
 
 class DataCollection:
-    def __int__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier):
+    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier):
         self._GSR_MODEL = gsr_model
         self._SPEECH_MODEL = speech_model
         self.led = LEDArray()
