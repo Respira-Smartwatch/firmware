@@ -3,9 +3,10 @@ from typing import Tuple, Dict, Union, Any
 import numpy as np
 import sys
 
-sys.path.insert(0, "./Models/speech-emotion-classifier/src")
+sys.path.insert(0, "/home/pi/firmware/Models/speech-emotion-classifier/src")
+sys.path.insert(0, "/home/pi/firmware/Drivers/")
 
-from Drivers.AudioDriver import AudioDriver
+from AudioDriver import AudioDriver
 from Respira import FeatureExtractor, EmotionClassifier
 
 
