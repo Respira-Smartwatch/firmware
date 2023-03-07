@@ -3,12 +3,13 @@ import json
 import time
 import sys
 import serial
+from pychartPusher import PychartPusher  
 
 sys.path.insert(0,"/home/pi/firmware/Drivers/")
 sys.path.insert(0,"/home/pi/firmware/Models/")
 
 from LEDArray import LEDArray
-import GSRClassifier
+from GSRClassifier import GSRClassifier
 from SpeechEmotionClassifier import SpeechEmotionClassifier
 
 _TTY_BUS = serial.Serial("/dev/ttyS0", baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=1)
@@ -23,6 +24,7 @@ class DataCollection:
         self._GSR_MODEL = gsr_model
         self._SPEECH_MODEL = speech_model
         self.led = LEDArray()
+        self.PP = PychartPusher()
 
     def sample_gsr(self):
         phasic, tonic = self._GSR_MODEL.predict()
@@ -63,7 +65,7 @@ class DataCollection:
                 data[test_name]["gsr_tonic"].append(tonic)
 
                 if plot_tty:
-                    push_to_tty([tonic, phasic])
+                    self.PP.send(f"{tonic}, {phasic}")
 
             self.led.speech()
             for i in range(5):
@@ -76,7 +78,7 @@ class DataCollection:
                 data[test_name]["speech_samples"].append(samples)
 
                 if plot_tty:
-                    push_to_tty(prob)
+                    self.PP.send(",".join(prob))
 
             self.led.gsr()
             for i in range(5):
@@ -86,6 +88,7 @@ class DataCollection:
 
                 if plot_tty:
                     push_to_tty([tonic, phasic])
+                    self.PP.send(f"{tonic}, {phasic}")
 
             self.led.idle()
 
