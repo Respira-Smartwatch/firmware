@@ -29,6 +29,18 @@ class DataCollection:
 
         self.lock = asyncio.Lock()
 
+    @staticmethod
+    def empty_sample_dict():
+        return dict({
+            "gsr_phasic": [],
+            "gsr_tonic": [],
+            "speech_happy": [],
+            "speech_sad": [],
+            "speech_disgust": [],
+            "speech_surprise": [],
+            "stress_rating": 0
+        })
+
     def sample_gsr(self, gsr_array):
         while True:
             phasic, tonic = self._GSR_MODEL.predict()
@@ -126,8 +138,9 @@ class DataCollection:
 
         # First Baseline Test ------------------------------------
         print("Baseline Test")
-
         t = 0  # DEBUG
+
+        data["baseline"] = self.empty_sample_dict()
         t += self.run_prediction(data, "baseline", True, True, 15)
 
         print(f"End of Baseline Test (time: {t}s)")
@@ -139,6 +152,7 @@ class DataCollection:
         # Expiration Test #1 ------------------------------------
         print("Expiration Test #1")
 
+        data["expiration1"] = self.empty_sample_dict()
         t += self.run_prediction(data, "expiration1", True, False, 15)
 
         print(f"End of Expiration Test (time: {t}s)")
@@ -154,6 +168,8 @@ class DataCollection:
 
         # Rest #1 -----------------------------------------------
         print("Rest #1")
+
+        data["rest1"] = self.empty_sample_dict()
         t += self.run_prediction(data, "rest1", True, False, 15)
 
         print(f"End of Rest #1 (time: {t}s)")
@@ -165,6 +181,7 @@ class DataCollection:
         # Expiration Test #2 ------------------------------------
         print("Expiration Test #2")
 
+        data["expiration2"] = self.empty_sample_dict()
         t += self.run_prediction(data, "expiration2", True, False, 15)
 
         print(f"End of Expiration #2 Test (time: {t}s)")
@@ -181,6 +198,7 @@ class DataCollection:
         # Rest #2 -----------------------------------------------
         print("Rest #2")
 
+        data["rest2"] = self.empty_sample_dict()
         t += self.run_prediction(data, "rest2", True, False, 15)
 
         print(f"End of Rest #2 (time: {t}s)")
@@ -192,6 +210,7 @@ class DataCollection:
         # Video Test #3 -----------------------------------------
         print("Video Test #3")
 
+        data["video"] = self.empty_sample_dict()
         t += self.run_prediction(data, "video", True, False, 15)
 
         print(f"End of Video Test. (time: {t})")
@@ -208,6 +227,7 @@ class DataCollection:
         # Rest #3 ----------------------------------------------
         print("Rest #3")
 
+        data["rest3"] = self.empty_sample_dict()
         t += self.run_prediction(data, "rest3", True, False, 15)
 
         print(f"End of Rest #3 (time: {t}s)")
@@ -219,6 +239,7 @@ class DataCollection:
         # Reciting Test #4 -------------------------------------
         print("Reciting Test #4")
 
+        data["recitation"] = self.empty_sample_dict()
         t += self.run_prediction(data, "recitation", True, True, 15)
 
         print(f"End of Reciting Test #4 (time: {t}s)")
@@ -235,6 +256,7 @@ class DataCollection:
         # Rest #4 ----------------------------------------------
         print("Rest #4")
 
+        data["rest4"] = self.empty_sample_dict()
         t += self.run_prediction(data, "rest4", True, False, 15)
 
         print(f"End of Rest #4 (time: {t}s)")
