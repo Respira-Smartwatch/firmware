@@ -68,20 +68,15 @@ class DataCollection:
             gsr_p.terminate()
             speech_p.terminate()
 
-            # Store results
-            # Setup test fields
-            data[test_name] = {
-                "gsr_phasic": [x[0] for x in gsr_array],
-                "gsr_tonic": [x[1] for x in gsr_array],
+        # Store results
+        data[test_name]["gsr_phasic"] = [x[0] for x in gsr_array]
+        data[test_name]["gsr_tonic"] = [x[1] for x in gsr_array]
 
-                "speech_happy": [x[0] for x in speech_array],
-                "speech_sad": [x[1] for x in speech_array],
-                "speech_disgust": [x[2] for x in speech_array],
-                "speech_surprise": [x[3] for x in speech_array],
-
-                "speech_samples": [x[4] for x in speech_array],
-                "stress_rating": 0
-            }
+        data[test_name]["speech_happy"] = [x[0] for x in speech_array]
+        data[test_name]["speech_sad"] = [x[1] for x in speech_array]
+        data[test_name]["speech_disgust"] = [x[2] for x in speech_array]
+        data[test_name]["speech_surprise"] = [x[3] for x in speech_array]
+        data[test_name]["speech_samples"] = [x[4] for x in speech_array]
 
         self.led.idle()
         return time.time() - start_time
