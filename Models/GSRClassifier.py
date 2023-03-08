@@ -1,6 +1,8 @@
 import sys
 
 sys.path.insert(0, "/home/pi/firmware/Models/eda-classifier/src/")
+sys.path.insert(0, "/home/pi/firmware/Drivers/")
+
 
 from GSRDriver import GSRDriver
 from cvx_solver import CVX
