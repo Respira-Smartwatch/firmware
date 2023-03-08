@@ -2,6 +2,9 @@ import asyncio
 import datetime
 import json
 import time
+import sys
+import serial
+from .pychartPusher import PychartPusher
 
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
@@ -22,6 +25,7 @@ class DataCollection:
         self._GSR_MODEL = gsr_model
         self._SPEECH_MODEL = speech_model
         self.led = LEDArray()
+        self.PP = PychartPusher()
 
         self.lock = asyncio.Lock()
 

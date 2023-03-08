@@ -1,7 +1,7 @@
-
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
 from Routines import DataCollection
+from Routines.DataCollection import DataCollection
 from timeit import default_timer as timer
 
 def capture_speech(led0, model):
@@ -20,6 +20,9 @@ if __name__ == "__main__":
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
     
+    # DataCollect Instance
+    dc = DataCollection(gsr_model, speech_model)
+
     # LED
     led = LEDArray()
 
@@ -49,14 +52,12 @@ if __name__ == "__main__":
              print(f"GSR Tonic:\t{tonic}")
 
         elif cmd == "data_collect":
-            data_collect = DataCollection.DataCollection(gsr_model, speech_model)
             subject_name = input("Please enter subject name: ")
-            data_collect.run(subject_name)
+            dc.run(subject_name)
         
         elif cmd == "data_debug":
-            data_collect = DataCollection.DataCollection(gsr_model, speech_model)
             subject_name = input("Please enter subject name: ")
-            data_collect.run(subject_name, debug=True)
+            dc.run(subject_name, debug=True)
 
         elif cmd == "profile":
             gsr_time = 0
