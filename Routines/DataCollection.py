@@ -29,23 +29,23 @@ class DataCollection:
 
         self.lock = asyncio.Lock()
 
-    def sample_gsr(self, gsr_array):
+    async def sample_gsr(self, gsr_array):
         while True:
             phasic, tonic = self._GSR_MODEL.predict()
 
-            with self.lock:
+            async with self.lock:
                 gsr_array.append([phasic, tonic])
 
-    def sample_speech(self, speech_array):
+    async def sample_speech(self, speech_array):
         while True:
             prob, samples = self._SPEECH_MODEL.predict(2.75)
             prob = list(prob.values())
             samples = list(samples)
 
-            with self.lock:
+            async with self.lock:
                 speech_array.append([prob[0], prob[1], prob[2], prob[3], samples])
 
-    def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float):
+    async def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float):
         self.led.idle()
 
         # Multiprocessing data structures
@@ -64,24 +64,25 @@ class DataCollection:
             continue
 
         # When time runs out, kill threads as long as they are not writing
-        with self.lock:
+        async with self.lock:
             gsr_p.terminate()
             speech_p.terminate()
 
             # Store results
             # Setup test fields
-            data[test_name] = {
-                "gsr_phasic": [x[0] for x in gsr_array],
-                "gsr_tonic": [x[1] for x in gsr_array],
 
-                "speech_happy": [x[0] for x in speech_array],
-                "speech_sad": [x[1] for x in speech_array],
-                "speech_disgust": [x[2] for x in speech_array],
-                "speech_surprise": [x[3] for x in speech_array],
+        data[test_name] = {
+            "gsr_phasic": [x[0] for x in gsr_array],
+            "gsr_tonic": [x[1] for x in gsr_array],
 
-                "speech_samples": [x[4] for x in speech_array],
-                "stress_rating": 0
-            }
+            "speech_happy": [x[0] for x in speech_array],
+            "speech_sad": [x[1] for x in speech_array],
+            "speech_disgust": [x[2] for x in speech_array],
+            "speech_surprise": [x[3] for x in speech_array],
+
+            "speech_samples": [x[4] for x in speech_array],
+            "stress_rating": 0
+        }
 
         self.led.idle()
         return time.time() - start_time
@@ -133,7 +134,7 @@ class DataCollection:
         print("Baseline Test")
 
         t = 0  # DEBUG
-        t += self.run_prediction(data, "baseline", True, True, 15)
+        self.run_prediction(data, "baseline", True, True, 15)
 
         print(f"End of Baseline Test (time: {t}s)")
 
@@ -144,7 +145,7 @@ class DataCollection:
         # Expiration Test #1 ------------------------------------
         print("Expiration Test #1")
 
-        t += self.run_prediction(data, "expiration1", True, False, 15)
+        self.run_prediction(data, "expiration1", True, False, 15)
 
         print(f"End of Expiration Test (time: {t}s)")
 
@@ -159,7 +160,7 @@ class DataCollection:
 
         # Rest #1 -----------------------------------------------
         print("Rest #1")
-        t += self.run_prediction(data, "rest1", True, False, 15)
+        self.run_prediction(data, "rest1", True, False, 15)
 
         print(f"End of Rest #1 (time: {t}s)")
 
@@ -170,7 +171,7 @@ class DataCollection:
         # Expiration Test #2 ------------------------------------
         print("Expiration Test #2")
 
-        t += self.run_prediction(data, "expiration2", True, False, 15)
+        self.run_prediction(data, "expiration2", True, False, 15)
 
         print(f"End of Expiration #2 Test (time: {t}s)")
 
@@ -186,7 +187,7 @@ class DataCollection:
         # Rest #2 -----------------------------------------------
         print("Rest #2")
 
-        t += self.run_prediction(data, "rest2", True, False, 15)
+        self.run_prediction(data, "rest2", True, False, 15)
 
         print(f"End of Rest #2 (time: {t}s)")
 
@@ -197,7 +198,7 @@ class DataCollection:
         # Video Test #3 -----------------------------------------
         print("Video Test #3")
 
-        t += self.run_prediction(data, "video", True, False, 15)
+        self.run_prediction(data, "video", True, False, 15)
 
         print(f"End of Video Test. (time: {t})")
 
@@ -213,7 +214,7 @@ class DataCollection:
         # Rest #3 ----------------------------------------------
         print("Rest #3")
 
-        t += self.run_prediction(data, "rest3", True, False, 15)
+        self.run_prediction(data, "rest3", True, False, 15)
 
         print(f"End of Rest #3 (time: {t}s)")
 
@@ -224,7 +225,7 @@ class DataCollection:
         # Reciting Test #4 -------------------------------------
         print("Reciting Test #4")
 
-        t += self.run_prediction(data, "recitation", True, True, 15)
+        self.run_prediction(data, "recitation", True, True, 15)
 
         print(f"End of Reciting Test #4 (time: {t}s)")
 
@@ -240,7 +241,7 @@ class DataCollection:
         # Rest #4 ----------------------------------------------
         print("Rest #4")
 
-        t += self.run_prediction(data, "rest4", True, False, 15)
+        self.run_prediction(data, "rest4", True, False, 15)
 
         print(f"End of Rest #4 (time: {t}s)")
 
