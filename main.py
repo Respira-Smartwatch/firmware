@@ -1,7 +1,6 @@
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
 from Routines import DataCollection
-from Routines.DataCollection import DataCollection
 from timeit import default_timer as timer
 
 def capture_speech(led0, model):
