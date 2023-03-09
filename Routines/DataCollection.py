@@ -1,6 +1,6 @@
-import asyncio
 import datetime
 import json
+import multiprocessing
 import time
 import sys
 import serial
@@ -8,7 +8,6 @@ from .pychartPusher import PychartPusher
 
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
-from multiprocessing import Process
 
 _TTY_BUS = serial.Serial("/dev/ttyS0", baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                          bytesize=serial.EIGHTBITS, timeout=1)
@@ -27,8 +26,6 @@ class DataCollection:
         self.led = LEDArray()
         self.PP = PychartPusher()
 
-        self.lock = asyncio.Lock()
-
     @staticmethod
     def empty_sample_dict():
         return dict({
@@ -41,44 +38,44 @@ class DataCollection:
             "stress_rating": 0
         })
 
-    async def sample_gsr(self, gsr_array):
+    def sample_gsr(self, queue):
         while True:
             phasic, tonic = self._GSR_MODEL.predict()
+            queue.put([phasic, tonic])
 
-            async with self.lock:
-                gsr_array.append([phasic, tonic])
-
-    async def sample_speech(self, speech_array):
+    def sample_speech(self, queue):
         while True:
             prob, samples = self._SPEECH_MODEL.predict(2.75)
             prob = list(prob.values())
             samples = list(samples)
 
-            async with self.lock:
-                speech_array.append([prob[0], prob[1], prob[2], prob[3], samples])
+            queue.put([prob[0], prob[1], prob[2], prob[3], samples])
 
-    async def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float):
+    def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float):
         self.led.idle()
 
         # Multiprocessing data structures
-        gsr_array = []
-        speech_array = []
+        gsr_q = multiprocessing.Queue()
+        speech_q = multiprocessing.Queue()
 
-        gsr_p = Process(target=self.sample_gsr, args=(gsr_array,))
-        speech_p = Process(target=self.sample_speech, args=(speech_array,))
+        gsr_p = multiprocessing.Process(target=self.sample_gsr, args=(gsr_q,))
+        speech_p = multiprocessing.Process(target=self.sample_speech, args=(speech_q,))
 
         # Sample before time runs out
         start_time = time.time()
         gsr_p.start()
         speech_p.start()
 
+        gsr_array = []
+        speech_array = []
+
         while time.time() - start_time <= time_s:
-            continue
+            gsr_array.append(gsr_q.get())
+            speech_array.append(speech_q.get())
 
         # When time runs out, kill threads as long as they are not writing
-        async with self.lock:
-            gsr_p.terminate()
-            speech_p.terminate()
+        gsr_p.terminate()
+        speech_p.terminate()
 
         # Store results
         data[test_name]["gsr_phasic"] = [x[0] for x in gsr_array]
