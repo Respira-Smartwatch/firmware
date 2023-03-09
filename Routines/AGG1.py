@@ -1,8 +1,10 @@
 import sys
 
 sys.path.insert(0, "/home/pi/firmware/Models")
+sys.path.insert(0, "/home/pi/firmware/Drivers")
 from GSRClassifier import GSRClassifier
 from SpeechEmotionClassifier import SpeechEmotionClassifier
+from LEDArray import LEDArray
 import numpy as np
 
 # Get GSR Precition
@@ -15,7 +17,7 @@ class Aggregate:
     def __init__(self, threshold: int=5):
         self.gsr = GSRClassifier()
         self.speech = SpeechEmotionClassifier()
-        led = LEDArray()
+        self.led = LEDArray()
         self.threshold = threshold
 
     def predict(self, samples):
@@ -49,7 +51,7 @@ class Aggregate:
             #only runs speech classifier once during sampling
             if val > self.threshold and ran == 0:
                 ran = 1
-                speech_data = self.speech.predict()
+                speech_data,_ = self.speech.predict()
                 maximum = speech_data['happy'] #default
                 for key,value in speech_data.items():
                     if (value > maximum):
