@@ -106,7 +106,9 @@ class DataCollection:
         debug_time = 0
 
         timestamp = str(datetime.datetime.now()).split(" ")[0]
-        filename = f"respira_{subject_name}_{timestamp}.json"
+        filename = f"respira_output.json"
+        #old name
+        #f"respira_{subject_name}_{timestamp}.json"
 
         data = {
             "subject": subject_name,
