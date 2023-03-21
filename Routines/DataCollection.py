@@ -3,7 +3,7 @@ import json
 import time
 import sys
 import serial
-from .pychartPusher import PychartPusher  
+from pychartPusher import PychartPusher  
 
 sys.path.insert(0,"/home/pi/firmware/Drivers/")
 sys.path.insert(0,"/home/pi/firmware/Models/")
