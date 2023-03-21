@@ -4,5 +4,5 @@ smbus
 spidev
 
 #RPi.GPIO
-#pyserial
+pyserial
 
