@@ -14,7 +14,7 @@ import numpy as np
 # Speech gives psychological stress
 
 class Aggregate:
-    def __init__(self, threshold: int=5):
+    def __init__(self, threshold: int=1):
         self.gsr = GSRClassifier()
         self.speech = SpeechEmotionClassifier()
         self.led = LEDArray()
