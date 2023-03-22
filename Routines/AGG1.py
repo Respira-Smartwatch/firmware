@@ -69,7 +69,7 @@ class Aggregate:
         if (confid <= 0.25):
             red = int(255 * confid) # indicates stress
             green = int(255 - 255 * confid) # does not indicate stress
-            led.result(red,green)
+            self.led.result(red,green)
         elif (confid < 0.75 and confid > 0.25):
             red = int(255 * confid) # indicates stress
             if (confid < 0.5):    
@@ -77,13 +77,13 @@ class Aggregate:
                 green = int(255 - 255 * confid) # does not indicate stress
             if (confid > 0.5):
                 green += 40 # Make greener
-                led.result(red,green)
+                self.led.result(red,green)
         else: # confid >= 0.75
             if confid > 1:
                 confid = 1
             red = int(255 * confid)  # indicates stress
             green = int(255 - 255 * confid) # does not indicate stress
-            led.result(red,green)
+            self.led.result(red,green)
         return 
 
 if __name__ == "__main__":
