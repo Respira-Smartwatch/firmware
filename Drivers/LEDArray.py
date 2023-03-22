@@ -25,4 +25,3 @@ class LEDArray:
         """The LED will be a different color based on the predicted emotion"""
         self.driver.set_pixel(self.idx, red, 0, blue, 10)
         self.driver.show()
-        pass
