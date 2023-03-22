@@ -1,4 +1,5 @@
 from Routines.DataCollection import DataCollection
+from Routines.AGG1 import Aggregate
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
 from timeit import default_timer as timer
@@ -17,6 +18,7 @@ if __name__ == "__main__":
     # Models
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
+    agg = 
     
     # DataCollect Instance
     dc = DataCollection(gsr_model, speech_model)
