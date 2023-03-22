@@ -52,8 +52,7 @@ class Aggregate:
 
             #only runs speech classifier once during sampling
             if val > self.threshold and ran == 0:
-                print("Reading Speech Data\n")
-                #time.sleep(8)
+                print("\nReading Speech Data\n")
                 ran = 1
                 speech_data,_ = self.speech.predict()
                 maximum = speech_data['happy'] #default
@@ -64,7 +63,7 @@ class Aggregate:
                         stress = stress_eval[key]
                         confid = (val) + (stress*confid) 
                 #turn on LEDs based on new value
-                print("confid: ", confid)
+                print("\nconfid:\n", confid)
                 self.LED(confid)
 
     def LED(self, confid):
