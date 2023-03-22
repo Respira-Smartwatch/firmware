@@ -55,8 +55,12 @@ if __name__ == "__main__":
             phasic, tonic = capture_gsr(led, gsr_model)
             print(f"GSR Phasic:\t{phasic}")
             print(f"GSR Tonic:\t{tonic}")
-            pychart.send(message=f"{tonic}")
 
+        elif cmd == "performance":
+            while True:
+                phasic, tonic = capture_gsr(led, gsr_model)
+                print(f"GSR Tonic:\t{tonic}")
+                pychart.send(message=f"{tonic}")
 
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
@@ -67,8 +71,7 @@ if __name__ == "__main__":
             dc.datacollection(subject_name, debug=True)
         
         elif cmd == "aggregate":
-            agg.predict(10)
-
+            raise NotImplementedError
         elif cmd == "profile":
             gsr_time = 0
             for i in range(20):
