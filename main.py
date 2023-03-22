@@ -1,4 +1,6 @@
 from Routines.DataCollection import DataCollection
+from Routines.AGG1 import Aggregate
+from Routines.pychartPusher import PychartPusher
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
 from timeit import default_timer as timer
@@ -17,12 +19,17 @@ if __name__ == "__main__":
     # Models
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
-    
+    agg = Aggregate()
+
     # DataCollect Instance
     dc = DataCollection(gsr_model, speech_model)
 
     # LED
     led = LEDArray()
+
+
+    # Pychart logger
+    pychart = PychartPusher() 
 
     # Model parameters
     speech_duration_s = 5.0
@@ -45,9 +52,11 @@ if __name__ == "__main__":
             print(emotions)
 
         elif cmd == "gsr":
-             phasic, tonic = capture_gsr(led, gsr_model)
-             print(f"GSR Phasic:\t{phasic}")
-             print(f"GSR Tonic:\t{tonic}")
+            phasic, tonic = capture_gsr(led, gsr_model)
+            print(f"GSR Phasic:\t{phasic}")
+            print(f"GSR Tonic:\t{tonic}")
+            pychart.send(message=f"{tonic}")
+
 
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
@@ -56,6 +65,9 @@ if __name__ == "__main__":
         elif cmd == "data_debug":
             subject_name = input("Please enter subject name: ")
             dc.datacollection(subject_name, debug=True)
+        
+        elif cmd == "aggregate":
+            agg.predict(10)
 
         elif cmd == "profile":
             gsr_time = 0
@@ -89,3 +101,4 @@ if __name__ == "__main__":
 
         elif cmd == "exit":
             exit(0)
+        
