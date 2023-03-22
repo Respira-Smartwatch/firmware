@@ -53,7 +53,7 @@ class Aggregate:
             #only runs speech classifier once during sampling
             if val > self.threshold and ran == 0:
                 print("Reading Speech Data\n")
-                time.sleep(8)
+                #time.sleep(8)
                 ran = 1
                 speech_data,_ = self.speech.predict()
                 maximum = speech_data['happy'] #default
@@ -93,5 +93,5 @@ class Aggregate:
 
 if __name__ == "__main__":
     a = Aggregate()
-    a.predict(5)
+    a.predict(10)
 
