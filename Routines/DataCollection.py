@@ -185,81 +185,81 @@ class DataCollection:
             time.sleep(8)  # 2:26 - 2:34
 
         # Expiration Test #2 ------------------------------------
-        print("Expiration Test #2")
+        # print("Expiration Test #2")
 
-        t += self.run_prediction(data, "expiration2", True, False, 15, 4, debug)
+        # t += self.run_prediction(data, "expiration2", True, False, 15, 4, debug)
 
-        print(f"End of Expiration #2 Test (time: {t}s)")
+        # print(f"End of Expiration #2 Test (time: {t}s)")
 
-        # Reading time ------------------------------------------
-        if not debug:
-            time.sleep(8)  # 3:34 - 3:42
-            stress = input("Enter stress level rating 0-5: ")
-        else:
-            stress = -1
+        # # Reading time ------------------------------------------
+        # if not debug:
+        #     time.sleep(8)  # 3:34 - 3:42
+        #     stress = input("Enter stress level rating 0-5: ")
+        # else:
+        #     stress = -1
 
-        data["expiration2"]["stress_rating"] = int(stress)
+        # data["expiration2"]["stress_rating"] = int(stress)
 
-        # Rest #2 -----------------------------------------------
-        print("Rest #2")
+        # # Rest #2 -----------------------------------------------
+        # print("Rest #2")
 
-        t += self.run_prediction(data, "rest2", True, False, 15, 2, debug)
+        # t += self.run_prediction(data, "rest2", True, False, 15, 2, debug)
 
-        print(f"End of Rest #2 (time: {t}s)")
+        # print(f"End of Rest #2 (time: {t}s)")
 
-        # Reading time ------------------------------------------
-        if not debug:
-            time.sleep(8)  # 4:12 - 4:20
+        # # Reading time ------------------------------------------
+        # if not debug:
+        #     time.sleep(8)  # 4:12 - 4:20
 
-        # Video Test #3 -----------------------------------------
-        print("Video Test #3")
+        # # Video Test #3 -----------------------------------------
+        # print("Video Test #3")
 
-        t += self.run_prediction(data, "video", True, False, 15, 10, debug)
+        # t += self.run_prediction(data, "video", True, False, 15, 10, debug)
 
-        print(f"End of Video Test. (time: {t})")
+        # print(f"End of Video Test. (time: {t})")
 
-        # Reading time -----------------------------------------
-        if not debug:
-            time.sleep(9)  # 6:50 - 6:59
-            stress = input("Enter stress level rating 0-5: ")
-        else:
-            stress = -1
+        # # Reading time -----------------------------------------
+        # if not debug:
+        #     time.sleep(9)  # 6:50 - 6:59
+        #     stress = input("Enter stress level rating 0-5: ")
+        # else:
+        #     stress = -1
 
-        data["video"]["stress_rating"] = int(stress)
+        # data["video"]["stress_rating"] = int(stress)
 
-        # Rest #3 ----------------------------------------------
-        print("Rest #3")
+        # # Rest #3 ----------------------------------------------
+        # print("Rest #3")
 
-        t += self.run_prediction(data, "rest3", True, False, 15, 2, debug)
+        # t += self.run_prediction(data, "rest3", True, False, 15, 2, debug)
 
-        print(f"End of Rest #3 (time: {t}s)")
+        # print(f"End of Rest #3 (time: {t}s)")
 
-        # Reading time -----------------------------------------
-        if not debug:
-            time.sleep(6)  # 7:29 - 7:35
+        # # Reading time -----------------------------------------
+        # if not debug:
+        #     time.sleep(6)  # 7:29 - 7:35
 
-        # Reciting Test #4 -------------------------------------
-        print("Reciting Test #4")
+        # # Reciting Test #4 -------------------------------------
+        # print("Reciting Test #4")
 
-        t += self.run_prediction(data, "recitation", True, True, 15, 2, debug)
+        # t += self.run_prediction(data, "recitation", True, True, 15, 2, debug)
 
-        print(f"End of Reciting Test #4 (time: {t}s)")
+        # print(f"End of Reciting Test #4 (time: {t}s)")
 
-        # Reading time -----------------------------------------
-        if not debug:
-            time.sleep(5)  # 8:05 - 8:10
-            stress = input("Enter stress level rating 0-5: ")
-        else:
-            stress = -1
+        # # Reading time -----------------------------------------
+        # if not debug:
+        #     time.sleep(5)  # 8:05 - 8:10
+        #     stress = input("Enter stress level rating 0-5: ")
+        # else:
+        #     stress = -1
 
-        data["recitation"]["stress_rating"] = int(stress)
+        # data["recitation"]["stress_rating"] = int(stress)
 
-        # Rest #4 ----------------------------------------------
-        print("Rest #4")
+        # # Rest #4 ----------------------------------------------
+        # print("Rest #4")
 
-        t += self.run_prediction(data, "rest4", True, False, 15, 2, debug)
+        # t += self.run_prediction(data, "rest4", True, False, 15, 2, debug)
 
-        print(f"End of Rest #4 (time: {t}s)")
+        # print(f"End of Rest #4 (time: {t}s)")
 
         # TEST FINISHED ---------------------------------------!
 
