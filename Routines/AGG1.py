@@ -45,7 +45,8 @@ class Aggregate:
                         val = 0
                     else:
                         val += average[t] - average[t-1]
-                val = ((val/5) - np.min(average)) / (np.max(average) - np.min(average)) # normalize range for average tonic sample difference from 0 to 1
+                if ((np.max(average) - np.min(average)) > 0):
+                    val = ((val/5) - np.min(average)) / (np.max(average) - np.min(average)) # normalize range for average tonic sample difference from 0 to 1
                 average = []  
 
             #only runs speech classifier once during sampling
