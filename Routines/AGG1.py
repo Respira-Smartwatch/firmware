@@ -63,31 +63,38 @@ class Aggregate:
                         stress = stress_eval[key]
                         confid = (val) + (stress*confid) 
                 #turn on LEDs based on new value
-                print("\nconfid:\n", confid)
+                print("\nConfid:", confid, "\n")
                 self.LED(confid)
 
     def LED(self, confid):
-
         # assumes Confid is confidence score normalized 0-1 for how stress the individual is
-        # Use normalized value 0-1 and multiply by 0-255 RGB scale (Usually will display orange/yellow)
-        if (confid <= 0.25):
-            red = int(255 * confid) # indicates stress
-            blue = int(255 - 255 * confid) # does not indicate stress
-            self.led.result(red, blue)
-        elif (confid < 0.75 and confid > 0.25):
-            red = int(255 * confid) # indicates stress
-            if (confid < 0.5):    
-                red += 40 # Make more red
-                blue = int(255 - 255 * confid) # does not indicate stress
-            if (confid > 0.5):
-                blue += 40 # Make more blue
-                self.led.result(red, blue)
-        else: # confid >= 0.75
-            if confid > 1:
-                confid = 1
-            red = int(255 * confid)  # indicates stress
-            blue = int(255 - 255 * confid) # does not indicate stress
-            self.led.result(red, blue)
+        # Use normalized value 0-1 and multiply by 0-255 RGB scale (Usually will display purple/pink)
+
+        #confid of 1: red
+        #confid of 0: blue
+
+        if confid > 1:
+            confid = 1
+        red = int(255 * confid)
+        blue = int(255 - (255 * confid))
+
+        #in case color indication isn't apparent
+        # if (confid <= 0.25):
+        #     red = int(255 * confid) # indicates stress
+        #     blue = int(255 - (255 * confid)) # does not indicate stress
+        #     self.led.result(red, blue)
+        # elif (confid < 0.75 and confid > 0.25):
+        #     red = int(255 * confid) # indicates stress
+        #     if (confid < 0.5):    
+        #         red += 40 # Make more red
+        #         blue = int(255 - (255 * confid)) # does not indicate stress
+        #     if (confid > 0.5):
+        #         blue += 40 # Make more blue
+        #         self.led.result(red, blue)
+        # else: # confid >= 0.75
+        #     red = int(255 * confid)  # indicates stress
+        #     blue = int(255 - (255 * confid)) # does not indicate stress
+        #     self.led.result(red, blue)
         return 
 
 if __name__ == "__main__":
