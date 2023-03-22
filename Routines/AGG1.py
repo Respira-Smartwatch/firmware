@@ -60,7 +60,7 @@ class Aggregate:
                         stress = stress_eval[key]
                         confid = (val) + (stress*confid) 
                 #turn on LEDs based on new value
-                print("confid: " + confid)
+                #print("confid: " + confid)
                 self.LED(confid)
 
     def LED(self, confid):
