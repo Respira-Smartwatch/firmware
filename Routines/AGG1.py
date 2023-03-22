@@ -90,5 +90,5 @@ class Aggregate:
 
 if __name__ == "__main__":
     a = Aggregate()
-    print(a.predict(30))
+    a.predict(30)
 
