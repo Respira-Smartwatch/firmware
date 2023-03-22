@@ -6,6 +6,7 @@ from GSRClassifier import GSRClassifier
 from SpeechEmotionClassifier import SpeechEmotionClassifier
 from LEDArray import LEDArray
 import numpy as np
+import time
 
 # Get GSR Precition
 # Get Speech Prediction
@@ -14,7 +15,7 @@ import numpy as np
 # Speech gives psychological stress
 
 class Aggregate:
-    def __init__(self, threshold: int=1):
+    def __init__(self, threshold: int=0):
         self.gsr = GSRClassifier()
         self.speech = SpeechEmotionClassifier()
         self.led = LEDArray()
@@ -51,6 +52,8 @@ class Aggregate:
 
             #only runs speech classifier once during sampling
             if val > self.threshold and ran == 0:
+                print("Reading Speech Data\n")
+                time.sleep(8)
                 ran = 1
                 speech_data,_ = self.speech.predict()
                 maximum = speech_data['happy'] #default
