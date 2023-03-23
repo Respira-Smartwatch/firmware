@@ -1,23 +1,23 @@
 import datetime
 import json
+import multiprocessing
 import time
 import sys
 import serial
-from .pychartPusher import PychartPusher  
+from .pychartPusher import PychartPusher
 
-sys.path.insert(0,"/home/pi/firmware/Drivers/")
-sys.path.insert(0,"/home/pi/firmware/Models/")
+from Drivers import LEDArray
+from Models import GSRClassifier, SpeechEmotionClassifier
 
-from LEDArray import LEDArray
-from GSRClassifier import GSRClassifier
-from SpeechEmotionClassifier import SpeechEmotionClassifier
+_TTY_BUS = serial.Serial("/dev/ttyS0", baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
+                         bytesize=serial.EIGHTBITS, timeout=1)
 
-_TTY_BUS = serial.Serial("/dev/ttyS0", baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=1)
 
 def push_to_tty(values: list):
     data = ','.join(values)
     _TTY_BUS.write(data.to_bytes(1, 'little'))
     return 1
+
 
 class DataCollection:
     def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier):
@@ -26,82 +26,72 @@ class DataCollection:
         self.led = LEDArray()
         self.PP = PychartPusher()
 
-    def sample_gsr(self):
-        phasic, tonic = self._GSR_MODEL.predict()
-        return phasic, tonic
-
-    def sample_speech(self):
-        prob, samples = self._SPEECH_MODEL.predict(2.75)
-        prob = list(prob.values())
-        samples = list(samples)
-
-        return [prob[0], prob[1], prob[2], prob[3]], samples
-
-    def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float, num_runs: int, debug: bool = False, plot_tty: bool = False):
-        self.led.idle()
-
-        data[test_name] = {
+    @staticmethod
+    def empty_sample_dict():
+        return dict({
             "gsr_phasic": [],
             "gsr_tonic": [],
-
             "speech_happy": [],
             "speech_sad": [],
             "speech_disgust": [],
             "speech_surprise": [],
-
-            #"speech_samples": [],
+            "speech_samples": [],
             "stress_rating": 0
-        }
+        })
 
-        t_time = 0.0
+    def sample_gsr(self, queue):
+        while True:
+            phasic, tonic = self._GSR_MODEL.predict()
+            queue.put([phasic, tonic])
 
-        for _ in range(num_runs):
-            s = time.time()
+    def sample_speech(self, queue):
+        while True:
+            prob, samples = self._SPEECH_MODEL.predict(2.75)
+            prob = list(prob.values())
+            samples = list(samples)
 
-            self.led.gsr()
-            for i in range(5):
-                phasic, tonic = self.sample_gsr()
-                data[test_name]["gsr_phasic"].append(phasic)
-                data[test_name]["gsr_tonic"].append(tonic)
+            queue.put([prob[0], prob[1], prob[2], prob[3], samples])
 
-                if plot_tty:
-                    self.PP.send(f"{tonic}, {phasic}")
+    def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float):
+        self.led.idle()
+        
+        # Multiprocessing data structures
+        gsr_q = multiprocessing.Queue()
+        speech_q = multiprocessing.Queue()
 
-            self.led.speech()
-            for i in range(5):
-                prob, samples = self.sample_speech()
-                data[test_name]["speech_happy"].append(prob[0])
-                data[test_name]["speech_sad"].append(prob[1])
-                data[test_name]["speech_disgust"].append(prob[2])
-                data[test_name]["speech_surprise"].append(prob[3])
+        gsr_p = multiprocessing.Process(target=self.sample_gsr, args=(gsr_q,))
+        speech_p = multiprocessing.Process(target=self.sample_speech, args=(speech_q,))
 
-                #data[test_name]["speech_samples"].append(samples)
+        # Sample before time runs out
+        start_time = time.time()
+        gsr_p.start()
+        speech_p.start()
 
-                if plot_tty:
-                    self.PP.send(",".join(prob))
+        gsr_array = []
+        speech_array = []
 
-            self.led.gsr()
-            for i in range(5):
-                phasic, tonic = self.sample_gsr()
-                data[test_name]["gsr_phasic"].append(phasic)
-                data[test_name]["gsr_tonic"].append(tonic)
+        while time.time() - start_time <= time_s:
+            gsr_array.append(gsr_q.get())
+            speech_array.append(speech_q.get())
 
-                if plot_tty:
-                    push_to_tty([tonic, phasic])
-                    self.PP.send(f"{tonic}, {phasic}")
+        # When time runs out, kill threads as long as they are not writing
+        gsr_p.terminate()
+        speech_p.terminate()
 
-            self.led.idle()
+        # Store results
+        data[test_name]["gsr_phasic"] = [x[0] for x in gsr_array]
+        data[test_name]["gsr_tonic"] = [x[1] for x in gsr_array]
 
-            t = time.time() - s
+        data[test_name]["speech_happy"] = [x[0] for x in speech_array]
+        data[test_name]["speech_sad"] = [x[1] for x in speech_array]
+        data[test_name]["speech_disgust"] = [x[2] for x in speech_array]
+        data[test_name]["speech_surprise"] = [x[3] for x in speech_array]
+        data[test_name]["speech_samples"] = [x[4] for x in speech_array]
 
-            if t < time_s and not debug:
-                time.sleep(time_s - t)
+        self.led.idle()
+        return time.time() - start_time
 
-            t_time += time.time() - s
-
-        return t_time
-
-    def datacollection(self, subject_name: str, debug=False):
+    def run(self, subject_name: str, debug=False):
         s = time.time()
         debug_time = 0
 
@@ -148,9 +138,10 @@ class DataCollection:
 
         # First Baseline Test ------------------------------------
         print("Baseline Test")
-
         t = 0  # DEBUG
-        t += self.run_prediction(data, "baseline", True, True, 15, 2, debug)
+
+        data["baseline"] = self.empty_sample_dict()
+        self.run_prediction(data, "baseline", True, True, 15)
 
         print(f"End of Baseline Test (time: {t}s)")
 
@@ -161,7 +152,8 @@ class DataCollection:
         # Expiration Test #1 ------------------------------------
         print("Expiration Test #1")
 
-        t += self.run_prediction(data, "expiration1", True, False, 15, 4, debug)
+        data["expiration1"] = self.empty_sample_dict()
+        self.run_prediction(data, "expiration1", True, False, 15)
 
         print(f"End of Expiration Test (time: {t}s)")
 
@@ -176,7 +168,9 @@ class DataCollection:
 
         # Rest #1 -----------------------------------------------
         print("Rest #1")
-        t += self.run_prediction(data, "rest1", True, False, 15, 2, debug)
+
+        data["rest1"] = self.empty_sample_dict()
+        self.run_prediction(data, "rest1", True, False, 15)
 
         print(f"End of Rest #1 (time: {t}s)")
 
@@ -187,7 +181,8 @@ class DataCollection:
         # Expiration Test #2 ------------------------------------
         print("Expiration Test #2")
 
-        t += self.run_prediction(data, "expiration2", True, False, 15, 4, debug)
+        data["expiration2"] = self.empty_sample_dict()
+        self.run_prediction(data, "expiration2", True, False, 15)
 
         print(f"End of Expiration #2 Test (time: {t}s)")
 
@@ -203,7 +198,8 @@ class DataCollection:
         # Rest #2 -----------------------------------------------
         print("Rest #2")
 
-        t += self.run_prediction(data, "rest2", True, False, 15, 2, debug)
+        data["rest2"] = self.empty_sample_dict()
+        self.run_prediction(data, "rest2", True, False, 15)
 
         print(f"End of Rest #2 (time: {t}s)")
 
@@ -214,7 +210,8 @@ class DataCollection:
         # Video Test #3 -----------------------------------------
         print("Video Test #3")
 
-        t += self.run_prediction(data, "video", True, False, 15, 10, debug)
+        data["video"] = self.empty_sample_dict()
+        self.run_prediction(data, "video", True, False, 15)
 
         print(f"End of Video Test. (time: {t})")
 
@@ -230,7 +227,8 @@ class DataCollection:
         # Rest #3 ----------------------------------------------
         print("Rest #3")
 
-        t += self.run_prediction(data, "rest3", True, False, 15, 2, debug)
+        data["rest3"] = self.empty_sample_dict()
+        self.run_prediction(data, "rest3", True, False, 15)
 
         print(f"End of Rest #3 (time: {t}s)")
 
@@ -241,7 +239,8 @@ class DataCollection:
         # Reciting Test #4 -------------------------------------
         print("Reciting Test #4")
 
-        t += self.run_prediction(data, "recitation", True, True, 15, 2, debug)
+        data["recitation"] = self.empty_sample_dict()
+        self.run_prediction(data, "recitation", True, True, 15)
 
         print(f"End of Reciting Test #4 (time: {t}s)")
 
@@ -257,7 +256,8 @@ class DataCollection:
         # Rest #4 ----------------------------------------------
         print("Rest #4")
 
-        t += self.run_prediction(data, "rest4", True, False, 15, 2, debug)
+        data["rest4"] = self.empty_sample_dict()
+        self.run_prediction(data, "rest4", True, False, 15)
 
         print(f"End of Rest #4 (time: {t}s)")
 
