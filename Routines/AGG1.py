@@ -27,13 +27,9 @@ class Aggregate:
         #if new value - baseline is > threshold, then activate speech classifier
         #both tonic and phasic have to be > threshold
 
-        stress_eval = {"happy": 0.1, "sad": 0.35, "disgust": 0.75, "surprise": 1} #scalers for emotion to stress response on confidence value NOTE: UPDATES NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
-        val=0
-        average = []
-        ran = 0
-        psamples = 0
-        tsamples = 0
-        tonicf = 0
+        stress_eval = {"happy": 0.1, "sad": 0.2, "disgust": 0.75, "surprise": 1} #scalers for emotion to stress response on confidence value NOTE: UPDATES NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
+        average = []  
+        val = 0
         for s in range(samples):
             phasic, tonic = self.gsr.predict()
             average.append(tonic)
@@ -42,7 +38,7 @@ class Aggregate:
             if s % 5:
                 for t in range(len(average)):
                     if t == 0:
-                        diff = 0
+                        ran = 0 # state machine to transition to speech recording
                         val = 0
                     else:
                         val += average[t] - average[t-1]
@@ -51,7 +47,7 @@ class Aggregate:
                 average = []  
 
             #only runs speech classifier once during sampling
-            if val > self.threshold and ran == 0:
+            if abs(val) > self.threshold and ran == 0:
                 print("\nReading Speech Data\n")
                 ran = 1
                 speech_data,_ = self.speech.predict()
@@ -61,7 +57,7 @@ class Aggregate:
                         maximum = value
                         confid = maximum / 100
                         stress = stress_eval[key]
-                        confid = (val) + (stress*confid) 
+                        confid = (stress*confid) 
                 #turn on LEDs based on new value
                 print("\nConfid:", confid, "\n")
                 self.LED(confid)
@@ -70,34 +66,31 @@ class Aggregate:
         # assumes Confid is confidence score normalized 0-1 for how stress the individual is
         # Use normalized value 0-1 and multiply by 0-255 RGB scale (Usually will display purple/pink)
 
-        #confid of 1: red
-        #confid of 0: blue
+        #confid of 1: red indicates stress
+        #confid of 0: blue does not indicate stress
 
         if confid > 1:
             confid = 1
-        red = int(255 * confid)
-        blue = int(255 - (255 * confid))
+        #red = int(255 * confid)
+        #blue = int(255 - (255 * confid))
 
-        #in case color indication isn't apparent
-        # if (confid <= 0.25):
-        #     red = int(255 * confid) # indicates stress
-        #     blue = int(255 - (255 * confid)) # does not indicate stress
-        #     self.led.result(red, blue)
-        # elif (confid < 0.75 and confid > 0.25):
-        #     red = int(255 * confid) # indicates stress
-        #     if (confid < 0.5):    
-        #         red += 40 # Make more red
-        #         blue = int(255 - (255 * confid)) # does not indicate stress
-        #     if (confid > 0.5):
-        #         blue += 40 # Make more blue
-        #         self.led.result(red, blue)
-        # else: # confid >= 0.75
-        #     red = int(255 * confid)  # indicates stress
-        #     blue = int(255 - (255 * confid)) # does not indicate stress
-        #     self.led.result(red, blue)
+        if (confid <= 0.25):
+            red = int(255 * confid) # indicates stress
+            blue = int(255 - (255 * confid)) # does not indicate stress
+        elif (confid < 0.75 and confid > 0.25):
+            red = int(255 * confid) # indicates stress
+            if (confid < 0.5):    
+                red += 40 # Make more red
+                blue = int(255 - (255 * confid)) # does not indicate stress
+            if (confid > 0.5):
+                blue += 40 # Make more blue
+        else: # confid >= 0.75
+            red = int(255 * confid)  # indicates stress
+            blue = int(255 - (255 * confid)) # does not indicate stress
+        
+        self.led.result(red, blue)
         return 
 
 if __name__ == "__main__":
     a = Aggregate()
     a.predict(10)
-
