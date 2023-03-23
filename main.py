@@ -18,7 +18,6 @@ if __name__ == "__main__":
     # Models
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
-    agg = 
     
     # DataCollect Instance
     dc = DataCollection(gsr_model, speech_model)
