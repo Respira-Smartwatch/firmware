@@ -6,7 +6,7 @@ import serial
 # you can send a message directly, or add to a growing message
 # that can be sent all at once at a later time
 class PychartPusher:
-    def __init__(self, bus: str="/dev/ttyS0", baud: int=9600):
+    def __init__(self, bus: str="/dev/ttyS0", baud: int=115200):
         self.bus_name = bus
         self.baud = baud
 
@@ -40,6 +40,7 @@ class PychartPusher:
 
     def send(self, message: str=None):
         if message:
+            message += "\n"
             return self.bus.write(message.encode('utf-8'))
         
         if self.message:

@@ -12,7 +12,7 @@ from Respira import FeatureExtractor, EmotionClassifier
 
 class SpeechEmotionClassifier:
     def __init__(self):
-        self.model = EmotionClassifier("./Models/speech-emotion-classifier/results/respira-emoc.bin")
+        self.model = EmotionClassifier("/home/pi/firmware/Models/speech-emotion-classifier/results/respira-emoc.bin")
         self.audio = AudioDriver()
 
     def predict(self, sample_length_sec: float = 5.0) -> tuple[dict[str, Union[float]], Any]:

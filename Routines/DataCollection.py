@@ -35,6 +35,7 @@ class DataCollection:
             "speech_sad": [],
             "speech_disgust": [],
             "speech_surprise": [],
+            "speech_samples": [],
             "stress_rating": 0
         })
 
@@ -53,7 +54,7 @@ class DataCollection:
 
     def run_prediction(self, data: dict, test_name: str, gsr: bool, speech: bool, time_s: float):
         self.led.idle()
-
+        
         # Multiprocessing data structures
         gsr_q = multiprocessing.Queue()
         speech_q = multiprocessing.Queue()
@@ -95,7 +96,9 @@ class DataCollection:
         debug_time = 0
 
         timestamp = str(datetime.datetime.now()).split(" ")[0]
-        filename = f"respira_{subject_name}_{timestamp}.json"
+        filename = f"respira_output.json"
+        #old name
+        #f"respira_{subject_name}_{timestamp}.json"
 
         data = {
             "subject": subject_name,
