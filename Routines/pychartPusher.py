@@ -38,7 +38,7 @@ class PychartPusher:
         self.message = ""
         return self.message
 
-    def send(self, message: str=""):
+    def send(self, message: str=None):
         if message:
             message += "\n"
             return self.bus.write(message.encode('utf-8'))

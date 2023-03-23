@@ -1,8 +1,10 @@
 from Routines.DataCollection import DataCollection
 from Routines.AGG1 import Aggregate
 from Routines.pychartPusher import PychartPusher
+
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
+from Routines import DataCollection
 from timeit import default_timer as timer
 
 def capture_speech(led0, model):
@@ -14,6 +16,7 @@ def capture_gsr(led0, model):
     led0.gsr()
     phasic, tonic = model.predict()
     return phasic, tonic
+
 
 if __name__ == "__main__":
     # Models
@@ -64,7 +67,7 @@ if __name__ == "__main__":
 
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")
-            dc.datacollection(subject_name)
+            dc.run(subject_name)
         
         elif cmd == "data_debug":
             subject_name = input("Please enter subject name: ")
@@ -72,6 +75,7 @@ if __name__ == "__main__":
         
         elif cmd == "aggregate":
             raise NotImplementedError
+
         elif cmd == "profile":
             gsr_time = 0
             for i in range(20):
