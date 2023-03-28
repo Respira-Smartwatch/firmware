@@ -30,6 +30,7 @@ class Aggregate:
         stress_eval = {"happy": 0.1, "sad": 0.2, "disgust": 0.75, "surprise": 1} #scalers for emotion to stress response on confidence value NOTE: UPDATES NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
         average = []  
         val = 0
+        confid = 0 
         for s in range(samples):
             phasic, tonic = self.gsr.predict()
             average.append(tonic)
@@ -73,7 +74,8 @@ class Aggregate:
             confid = 1
         #red = int(255 * confid)
         #green = int(255 - (255 * confid))
-
+        green = 0
+        red = 0
         if (confid <= 0.25):
             red = int(255 * confid) # indicates stress
             green = int(255 - (255 * confid)) # does not indicate stress
@@ -87,8 +89,7 @@ class Aggregate:
         else: # confid >= 0.75
             red = int(255 * confid)  # indicates stress
             green = int(255 - (255 * confid)) # does not indicate stress
-        
-        self.led.result(red, blue)
+        self.led.result(red, green)
         return 
 
 #if __name__ == "__main__":

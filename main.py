@@ -50,6 +50,8 @@ if __name__ == "__main__":
             print("aggregate: combine gsr and speech samples")
             print("data_collect: run data collection")
             print("data_debug: run data collection no input req")
+            print("performance: provides demo with pychart")
+            print("led: test LED colors")
             print("exit: exit program")
 
         elif cmd == "speech":
