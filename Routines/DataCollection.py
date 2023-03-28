@@ -4,7 +4,7 @@ import multiprocessing
 import time
 import sys
 import serial
-from .pychartPusher import PychartPusher
+from .PychartPusher import PychartPusher
 
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
@@ -20,10 +20,10 @@ def push_to_tty(values: list):
 
 
 class DataCollection:
-    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier):
+    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, ledarray: LEDArray):
         self._GSR_MODEL = gsr_model
         self._SPEECH_MODEL = speech_model
-        self.led = LEDArray()
+        self.led = ledarray
         self.PP = PychartPusher()
 
     @staticmethod

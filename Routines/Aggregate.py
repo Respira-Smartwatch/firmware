@@ -4,7 +4,7 @@ sys.path.insert(0, "/home/pi/firmware/Models")
 sys.path.insert(0, "/home/pi/firmware/Drivers")
 from GSRClassifier import GSRClassifier
 from SpeechEmotionClassifier import SpeechEmotionClassifier
-from LEDArray import LEDArray
+from Drivers import LEDArray
 import numpy as np
 import time
 
@@ -15,11 +15,11 @@ import time
 # Speech gives psychological stress
 
 class Aggregate:
-    def __init__(self, threshold: int=0):
-        self.gsr = GSRClassifier()
-        self.speech = SpeechEmotionClassifier()
-        self.led = LEDArray()
-        self.threshold = threshold
+    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, ledarray: LEDArray):
+        self.gsr = gsr_model
+        self.speech = speech_model
+        self.led = ledarray
+        self.threshold = 0
 
     def predict(self, samples):
         #average tonic and phasic to make baseline
@@ -59,7 +59,7 @@ class Aggregate:
                         stress = stress_eval[key]
                         confid = (stress*confid) 
                 #turn on LEDs based on new value
-                print("\nConfid:", confid, "\n")
+                #print("\nConfid:", confid, "\n")
                 self.LED(confid)
 
     def LED(self, confid):
@@ -91,6 +91,6 @@ class Aggregate:
         self.led.result(red, blue)
         return 
 
-if __name__ == "__main__":
-    a = Aggregate()
-    a.predict(10)
+#if __name__ == "__main__":
+#    a = Aggregate()
+#    a.predict(10)

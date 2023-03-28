@@ -1,6 +1,6 @@
-from Routines.DataCollection import DataCollection
-from Routines.AGG1 import Aggregate
-from Routines.pychartPusher import PychartPusher
+from Routines import DataCollection
+from Routines import Aggregate
+from Routines import PychartPusher
 
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
@@ -22,14 +22,15 @@ if __name__ == "__main__":
     # Models
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
-    agg = Aggregate()
-
-    # DataCollect Instance
-    dc = DataCollection(gsr_model, speech_model)
 
     # LED
     led = LEDArray()
-
+    
+    # DataCollect Instance
+    dc = DataCollection(gsr_model, speech_model, led)
+    
+    # Aggregate
+    agg = Aggregate(gsr_model, speech_model, led)
 
     # Pychart logger
     pychart = PychartPusher() 
@@ -46,6 +47,7 @@ if __name__ == "__main__":
             print("Available commands:")
             print("speech: take a speech sample")
             print("gsr: take a gsr sample")
+            print("aggregate: combine gsr and speech samples")
             print("data_collect: run data collection")
             print("data_debug: run data collection no input req")
             print("exit: exit program")
@@ -74,7 +76,7 @@ if __name__ == "__main__":
             dc.datacollection(subject_name, debug=True)
         
         elif cmd == "aggregate":
-            raise NotImplementedError
+            agg.predict(10)
 
         elif cmd == "profile":
             gsr_time = 0
