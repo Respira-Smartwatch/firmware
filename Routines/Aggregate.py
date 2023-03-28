@@ -67,26 +67,26 @@ class Aggregate:
         # Use normalized value 0-1 and multiply by 0-255 RGB scale (Usually will display purple/pink)
 
         #confid of 1: red indicates stress
-        #confid of 0: blue does not indicate stress
+        #confid of 0: green does not indicate stress
 
         if confid > 1:
             confid = 1
         #red = int(255 * confid)
-        #blue = int(255 - (255 * confid))
+        #green = int(255 - (255 * confid))
 
         if (confid <= 0.25):
             red = int(255 * confid) # indicates stress
-            blue = int(255 - (255 * confid)) # does not indicate stress
+            green = int(255 - (255 * confid)) # does not indicate stress
         elif (confid < 0.75 and confid > 0.25):
             red = int(255 * confid) # indicates stress
             if (confid < 0.5):    
                 red += 40 # Make more red
-                blue = int(255 - (255 * confid)) # does not indicate stress
+                green = int(255 - (255 * confid)) # does not indicate stress
             if (confid > 0.5):
-                blue += 40 # Make more blue
+                green += 40 # Make more green
         else: # confid >= 0.75
             red = int(255 * confid)  # indicates stress
-            blue = int(255 - (255 * confid)) # does not indicate stress
+            green = int(255 - (255 * confid)) # does not indicate stress
         
         self.led.result(red, blue)
         return 
