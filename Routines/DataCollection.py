@@ -96,9 +96,7 @@ class DataCollection:
         debug_time = 0
 
         timestamp = str(datetime.datetime.now()).split(" ")[0]
-        filename = f"respira_output.json"
-        #old name
-        #f"respira_{subject_name}_{timestamp}.json"
+        filename = f"respira_{subject_name}_{timestamp}.json"
 
         data = {
             "subject": subject_name,
@@ -141,7 +139,7 @@ class DataCollection:
         t = 0  # DEBUG
 
         data["baseline"] = self.empty_sample_dict()
-        self.run_prediction(data, "baseline", True, True, 30-4)
+        self.run_prediction(data, "baseline", True, True, 30-5.5)
 
         print(f"End of Baseline Test (time: {t}s)")
 
@@ -153,7 +151,7 @@ class DataCollection:
         print("Expiration Test #1")
 
         data["expiration1"] = self.empty_sample_dict()
-        self.run_prediction(data, "expiration1", True, False, 60-11)
+        self.run_prediction(data, "expiration1", True, False, 60-9)
 
         print(f"End of Expiration Test (time: {t}s)")
 
@@ -170,7 +168,7 @@ class DataCollection:
         print("Rest #1")
 
         data["rest1"] = self.empty_sample_dict()
-        self.run_prediction(data, "rest1", True, False, 30-5)
+        self.run_prediction(data, "rest1", True, False, 30-5.5)
 
         print(f"End of Rest #1 (time: {t}s)")
 
@@ -182,7 +180,7 @@ class DataCollection:
         print("Expiration Test #2")
 
         data["expiration2"] = self.empty_sample_dict()
-        self.run_prediction(data, "expiration2", True, False, 60-11)
+        self.run_prediction(data, "expiration2", True, False, 60-9)
 
         print(f"End of Expiration #2 Test (time: {t}s)")
 
@@ -199,7 +197,7 @@ class DataCollection:
         print("Rest #2")
 
         data["rest2"] = self.empty_sample_dict()
-        self.run_prediction(data, "rest2", True, False, 30-5)
+        self.run_prediction(data, "rest2", True, False, 30-6.5)
 
         print(f"End of Rest #2 (time: {t}s)")
 
@@ -211,7 +209,7 @@ class DataCollection:
         print("Video Test #3")
 
         data["video"] = self.empty_sample_dict()
-        self.run_prediction(data, "video", True, False, 150-7)
+        self.run_prediction(data, "video", True, False, 150-9)
 
         print(f"End of Video Test. (time: {t})")
 
@@ -228,7 +226,7 @@ class DataCollection:
         print("Rest #3")
 
         data["rest3"] = self.empty_sample_dict()
-        self.run_prediction(data, "rest3", True, False, 30-3)
+        self.run_prediction(data, "rest3", True, False, 30-6)
 
         print(f"End of Rest #3 (time: {t}s)")
 
@@ -240,7 +238,7 @@ class DataCollection:
         print("Reciting Test #4")
 
         data["recitation"] = self.empty_sample_dict()
-        self.run_prediction(data, "recitation", True, True, 30-3)
+        self.run_prediction(data, "recitation", True, True, 30-5)
 
         print(f"End of Reciting Test #4 (time: {t}s)")
 
@@ -257,7 +255,7 @@ class DataCollection:
         print("Rest #4")
 
         data["rest4"] = self.empty_sample_dict()
-        self.run_prediction(data, "rest4", True, False, 30-3)
+        self.run_prediction(data, "rest4", True, False, 30-5)
 
         print(f"End of Rest #4 (time: {t}s)")
 

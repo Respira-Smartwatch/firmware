@@ -15,12 +15,12 @@ class Aggregate:
         self.gsr = gsr_model # GSR gives instant stress *(physiological)
         self.speech = speech_model # Speech gives psychological stress
         self.led = ledarray
-        self.threshold = 0
+        self.threshold = 1
 	
     @staticmethod
     def empty_sample_dict():
         return dict({
-            "gsr_tonic": [],
+            "average_gsr_tonic": [],
             "speech_class": [],
             "speech_probability": [],
             "stress_score": []
@@ -32,14 +32,17 @@ class Aggregate:
         #if new value - baseline is > threshold, then activate speech classifier
         #tonic has to be > threshold
 
-        timestamp = str(datetime.datetime.now()).split(" ")[0]
-        f"respira_{timestamp}.json"
+        timedate = str(datetime.datetime.now()).split(" ")[0]
+        filetime = str(datetime.datetime.now()).split(" ")[1]
+        filename = f"respira_{timedate}_{filetime}.json"
         data = {
-	        "date": timestamp
+            "title": "Respira",
+	        "date": timedate
 	    }
 
-        stress_eval = {"happy": 0.1, "sad": 0.2, "disgust": 0.75, "surprise": 1} #scalers for emotion to stress response on confidence value NOTE: UPDATES NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
-        average = []  
+        stress_eval = {"happy": 0.1, "sad": 0.3, "disgust": 0.75, "surprise": 1} #scalers for emotion to stress response on confidence value NOTE: UPDATES NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
+        average = [] 
+        ran = 0
         val = 0
         confid = 0 
         for s in range(samples):
@@ -52,8 +55,8 @@ class Aggregate:
                         ran = 0 # state machine to transition to speech recording
                         val = 0
                     else:
-                        val += average[t] - average[t-1]
-                if ((np.max(average) - np.min(average)) > 0):
+                        val += abs(average[t] - average[t-1])
+                if ((np.max(average) - np.min(average)) != 0):
                     val = ((val/5) - np.min(average)) / (np.max(average) - np.min(average)) # normalize range for average tonic sample difference from 0 to 1
                 average = []  
 
@@ -76,14 +79,14 @@ class Aggregate:
             timestamp = str(datetime.datetime.now()).split(" ")[1]	 
             if ran:
                 data[timestamp] = self.empty_sample_dict()
-                data[timestamp]["gsr_tonic"] = av
-                data[timestamp]["speech_key"] = max_key
+                data[timestamp]["average_gsr_tonic"] = av
+                data[timestamp]["speech_class"] = max_key
                 data[timestamp]["speech_probability"] = maximum
                 data[timestamp]["stress_score"] = confid
             else:
                 data[timestamp] = self.empty_sample_dict()
-                data[timestamp]["gsr_tonic"] = av
-                data[timestamp]["speech_key"] = 0
+                data[timestamp]["average_gsr_tonic"] = av
+                data[timestamp]["speech_class"] = 0
                 data[timestamp]["speech_probability"] = 0
                 data[timestamp]["stress_score"] = 0
                 
@@ -117,5 +120,4 @@ class Aggregate:
             green = int(255 - (255 * confid)) # does not indicate stress
         self.led.result(red, green)
         return
-        
         
