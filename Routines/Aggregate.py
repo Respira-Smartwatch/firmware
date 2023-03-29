@@ -65,32 +65,31 @@ class Aggregate:
 
     def LED(self, confid):
         # assumes Confid is confidence score normalized 0-1 for how stress the individual is
-        # Use normalized value 0-1 and multiply by 0-255 RGB scale (Usually will display purple/pink)
+        # Use normalized value 0-1 and multiply by 0-255 RGB scale 
 
         #confid of 1: red indicates stress
         #confid of 0: green does not indicate stress
 
         if confid > 1:
             confid = 1
-        #red = int(255 * confid)
-        #green = int(255 - (255 * confid))
         green = 0
         red = 0
+
         if (confid <= 0.25):
             red = int(255 * confid) # indicates stress
             green = int(255 - (255 * confid)) # does not indicate stress
         elif (confid < 0.75 and confid > 0.25):
             red = int(255 * confid) # indicates stress
-            if (confid < 0.5):    
-                red += 40 # Make more red
-                green = int(255 - (255 * confid)) # does not indicate stress
-            if (confid > 0.5):
+            green = int(255 - (255 * confid)) # does not indicate stress
+            if (confid < 0.5) and (green < 210):
                 green += 40 # Make more green
+            if (confid > 0.5) and (red < 210):
+                red += 40 # Make more red
         else: # confid >= 0.75
             red = int(255 * confid)  # indicates stress
             green = int(255 - (255 * confid)) # does not indicate stress
         self.led.result(red, green)
-        return 
+        return
 
 #if __name__ == "__main__":
 #    a = Aggregate()
