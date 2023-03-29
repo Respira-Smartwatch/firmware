@@ -1,4 +1,6 @@
 import sys
+import json
+import datetime
 
 sys.path.insert(0, "/home/pi/firmware/Models")
 sys.path.insert(0, "/home/pi/firmware/Drivers")
@@ -8,42 +10,53 @@ from Drivers import LEDArray
 import numpy as np
 import time
 
-# Get GSR Precition
-# Get Speech Prediction
-# Combine these in some meaningful way to guage total stress
-# GSR gives instant stress *(physiological)
-# Speech gives psychological stress
-
 class Aggregate:
     def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, ledarray: LEDArray):
-        self.gsr = gsr_model
-        self.speech = speech_model
+        self.gsr = gsr_model # GSR gives instant stress *(physiological)
+        self.speech = speech_model # Speech gives psychological stress
         self.led = ledarray
-        self.threshold = 0
+        self.threshold = 1
+	
+    @staticmethod
+    def empty_sample_dict():
+        return dict({
+            "average_gsr_tonic": [],
+            "speech_class": [],
+            "speech_probability": [],
+            "stress_score": []
+        })
 
-    def predict(self, samples):
-        #average tonic and phasic to make baseline
+    def predict(self, samples: int):
+        #average tonic to make baseline
         #compare new values to previous baseline
         #if new value - baseline is > threshold, then activate speech classifier
-        #both tonic and phasic have to be > threshold
+        #tonic has to be > threshold
 
-        stress_eval = {"happy": 0.1, "sad": 0.2, "disgust": 0.75, "surprise": 1} #scalers for emotion to stress response on confidence value NOTE: UPDATES NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
-        average = []  
+        timedate = str(datetime.datetime.now()).split(" ")[0]
+        filetime = str(datetime.datetime.now()).split(" ")[1]
+        filename = f"respira_{timedate}_{filetime}.json"
+        data = {
+            "title": "Respira",
+	        "date": timedate
+	    }
+
+        stress_eval = {"happy": 0.1, "sad": 0.3, "disgust": 0.75, "surprise": 1} #scalers for emotion to stress response on confidence value NOTE: UPDATES NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
+        average = [] 
+        ran = 0
         val = 0
         confid = 0 
         for s in range(samples):
             phasic, tonic = self.gsr.predict()
             average.append(tonic)
-            #tsamples += tonic
-            #tonicbl = tonic - (tsamples / (s + 1))
+            av = sum(average)/len(average)
             if s % 5:
                 for t in range(len(average)):
                     if t == 0:
                         ran = 0 # state machine to transition to speech recording
                         val = 0
                     else:
-                        val += average[t] - average[t-1]
-                if ((np.max(average) - np.min(average)) > 0):
+                        val += abs(average[t] - average[t-1])
+                if ((np.max(average) - np.min(average)) != 0):
                     val = ((val/5) - np.min(average)) / (np.max(average) - np.min(average)) # normalize range for average tonic sample difference from 0 to 1
                 average = []  
 
@@ -54,19 +67,36 @@ class Aggregate:
                 speech_data,_ = self.speech.predict()
                 maximum = speech_data['happy'] #default
                 for key,value in speech_data.items():
-                    if (value > maximum):
+                    if (value >= maximum):
                         maximum = value
+                        max_key = key
                         confid = maximum / 100
                         stress = stress_eval[key]
                         confid = (stress*confid) 
                 #turn on LEDs based on new value
-                #print("\nConfid:", confid, "\n")
                 self.LED(confid)
+	   
+            timestamp = str(datetime.datetime.now()).split(" ")[1]	 
+            if ran:
+                data[timestamp] = self.empty_sample_dict()
+                data[timestamp]["average_gsr_tonic"] = av
+                data[timestamp]["speech_class"] = max_key
+                data[timestamp]["speech_probability"] = maximum
+                data[timestamp]["stress_score"] = confid
+            else:
+                data[timestamp] = self.empty_sample_dict()
+                data[timestamp]["average_gsr_tonic"] = av
+                data[timestamp]["speech_class"] = 0
+                data[timestamp]["speech_probability"] = 0
+                data[timestamp]["stress_score"] = 0
+                
+        with open(filename, 'w') as fout:
+            json_dumps_str = json.dumps(data, indent=4)
+            print(json_dumps_str, file=fout)
 
     def LED(self, confid):
         # assumes Confid is confidence score normalized 0-1 for how stress the individual is
         # Use normalized value 0-1 and multiply by 0-255 RGB scale 
-
         #confid of 1: red indicates stress
         #confid of 0: green does not indicate stress
 
@@ -91,6 +121,3 @@ class Aggregate:
         self.led.result(red, green)
         return
 
-#if __name__ == "__main__":
-#    a = Aggregate()
-#    a.predict(10)

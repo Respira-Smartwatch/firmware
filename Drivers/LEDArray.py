@@ -7,8 +7,8 @@ class LEDArray:
         self.driver = APA102(3)
 
     def idle(self):
-        """In the idle state, the LED is green"""
-        self.driver.set_pixel(self.idx, 0, 255, 0, 10)
+        """In the idle state, the LED is white"""
+        self.driver.set_pixel(self.idx, 255, 255, 255, 10)
         self.driver.show()
 
     def speech(self):
@@ -25,4 +25,3 @@ class LEDArray:
         """The LED will be a different color based on the predicted emotion"""
         self.driver.set_pixel(self.idx, red, green, 0, 10)
         self.driver.show()
-        pass
