@@ -74,7 +74,7 @@ class Aggregate:
                 self.LED(confid)
 	   
             timestamp = str(datetime.datetime.now()).split(" ")[1]	 
-            if confid:
+            if ran:
                 data[timestamp] = self.empty_sample_dict()
                 data[timestamp]["gsr_tonic"] = av
                 data[timestamp]["speech_key"] = max_key
