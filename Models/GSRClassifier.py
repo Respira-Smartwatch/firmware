@@ -15,5 +15,11 @@ class GSRClassifier:
 
     def predict(self):
         data = self.gsr.get_sample()
-        phasic_av, tonic_av = self.model.predict(data)
-        return phasic_av, tonic_av
+        phasic_av, tonic_av, stat = self.model.predict(data)
+        return phasic_av, tonic_av, stat[0]
+
+
+if __name__ == "__main__":
+    gc = GSRClassifier()
+
+    print(gc.predict())
