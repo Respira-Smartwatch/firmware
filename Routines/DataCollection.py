@@ -20,10 +20,10 @@ def push_to_tty(values: list):
 
 
 class DataCollection:
-    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, ledarray: LEDArray):
+    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, led_array: LEDArray):
         self._GSR_MODEL = gsr_model
         self._SPEECH_MODEL = speech_model
-        self.led = ledarray
+        self.led = led_array
         self.PP = PychartPusher()
 
     @staticmethod
@@ -41,8 +41,10 @@ class DataCollection:
 
     def sample_gsr(self, queue):
         while True:
-            phasic, tonic = self._GSR_MODEL.predict()
-            queue.put([phasic, tonic])
+            phasic, tonic, stat = self._GSR_MODEL.predict()
+
+            if stat == "optimal":
+                queue.put([phasic, tonic])
 
     def sample_speech(self, queue):
         while True:
