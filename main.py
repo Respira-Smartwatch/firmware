@@ -12,9 +12,13 @@ def capture_speech(led0, model):
     emotions = model.predict()
     return emotions
 
+
+# Takes state into account
 def capture_gsr(led0, model):
     led0.gsr()
-    phasic, tonic = model.predict()
+    phasic, tonic, stat  = model.predict()
+    if stat != "optimal":
+        print("I am not optimal...")
     return phasic, tonic
 
 
