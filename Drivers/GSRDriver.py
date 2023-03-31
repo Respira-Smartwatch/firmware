@@ -1,6 +1,9 @@
 import smbus
 import time
 
+_DEBUG = True
+
+
 class GSRDriver:
     def __init__(self, f_s=256):
         self.channel = 1
@@ -38,9 +41,16 @@ class GSRDriver:
             time.sleep(next(g))
             s = self.read_once()
             if type(s) == None:
+                if _DEBUG:
+                    print(f"SAMPLE ERROR {s}") 
                 s = sample[i-1]
             sample += s,
             i += 1
+        if _DEBUG:
+            print("******* GSR DRIVER DEBUG: *******")
+            print(f" Sample: {sample}")
+            print(f" Sample Len: {len(sample)}")
+
         return sample
 
 if __name__ == "__main__":
