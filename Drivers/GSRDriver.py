@@ -48,15 +48,16 @@ class GSRDriver:
             i += 1
         if _DEBUG:
             print("******* GSR DRIVER DEBUG: *******")
-            print(f" Sample: {sample}")
+            print(f" Sample raw data: {sample}")
             print(f" Sample Len: {len(sample)}")
+            print("*********************************")
 
         return sample
 
 if __name__ == "__main__":
     gsr = GSRDriver()
     errors = 0
-    number_tests=10000
+    number_tests=1000
     s_time = time.perf_counter()
     for i in range(number_tests):
         n = gsr.read_once()
@@ -70,23 +71,23 @@ if __name__ == "__main__":
     e_time2 = time.perf_counter()
     t2 = (e_time2 - s_time2)/gsr.sample_rate
 
-    s_time3 = time.perf_counter()
-    x1 = gsr.get_sample2()
-    e_time3 = time.perf_counter()
-    t3 = (e_time3 - s_time3)/gsr.sample_rate
+    #s_time3 = time.perf_counter()
+    #x1 = gsr.get_sample2()
+    #e_time3 = time.perf_counter()
+    #t3 = (e_time3 - s_time3)/gsr.sample_rate
 
     #print(f"Total errors = {errors}/{number_tests}")
 
-    #print("FOR SAMPLE ONCE IN LOOP: ----------------------")
-    #print(f"Total time = {e_time - s_time}")
-    #print(f"Average time per sample = {t}")
-    #print(f"Average frequency = {1/t}Hz")
-    #print("\n\n")
-    #print("FOR GET SAMPLE: ------------------------------")
-    #print(f"Total time = {e_time2 - s_time2}")
-    #print(f"Average time per sample = {t2}")
-    #print(f"Average frequency = {1/t2}Hz")
-    #print("\n\n")
+    print("FOR SAMPLE ONCE IN LOOP: ----------------------")
+    print(f"Total time = {e_time - s_time}")
+    print(f"Average time per sample = {t}")
+    print(f"Average frequency = {1/t}Hz")
+    print("\n\n")
+    print("FOR GET SAMPLE: ------------------------------")
+    print(f"Total time = {e_time2 - s_time2}")
+    print(f"Average time per sample = {t2}")
+    print(f"Average frequency = {1/t2}Hz")
+    print("\n\n")
     #print("FOR GET SAMPLE2: ------------------------------")
     #print(f"Total time = {e_time3 - s_time3}")
     #print(f"Average time per sample = {t3}")
