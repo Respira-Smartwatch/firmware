@@ -2,12 +2,12 @@ import datetime
 import json
 import multiprocessing
 import time
-import sys
+
 import serial
-from .PychartPusher import PychartPusher
 
 from Drivers import LEDArray
 from Models import GSRClassifier, SpeechEmotionClassifier
+from .PychartPusher import PychartPusher
 
 _TTY_BUS = serial.Serial("/dev/ttyS0", baudrate=9600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                          bytesize=serial.EIGHTBITS, timeout=1)
@@ -61,24 +61,33 @@ class DataCollection:
         gsr_q = multiprocessing.Queue()
         speech_q = multiprocessing.Queue()
 
-        gsr_p = multiprocessing.Process(target=self.sample_gsr, args=(gsr_q,))
-        speech_p = multiprocessing.Process(target=self.sample_speech, args=(speech_q,))
-
         # Sample before time runs out
         start_time = time.time()
-        gsr_p.start()
-        speech_p.start()
+
+        if gsr:
+            gsr_p = multiprocessing.Process(target=self.sample_gsr, args=(gsr_q,))
+            gsr_p.start()
+
+        if speech:
+            speech_p = multiprocessing.Process(target=self.sample_speech, args=(speech_q,))
+            speech_p.start()
 
         gsr_array = []
         speech_array = []
 
         while time.time() - start_time <= time_s:
-            gsr_array.append(gsr_q.get())
-            speech_array.append(speech_q.get())
+            if gsr:
+                gsr_array.append(gsr_q.get())
+
+            if speech:
+                speech_array.append(speech_q.get())
 
         # When time runs out, kill threads as long as they are not writing
-        gsr_p.terminate()
-        speech_p.terminate()
+        if gsr:
+            gsr_p.terminate()
+
+        if speech:
+            speech_p.terminate()
 
         # Store results
         data[test_name]["gsr_phasic"] = [x[0] for x in gsr_array]

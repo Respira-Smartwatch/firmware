@@ -1,7 +1,6 @@
 import pyaudio
 import wave
 import numpy as np
-import sys
 import struct
 
 
@@ -29,25 +28,25 @@ class AudioDriver:
                 print("Output Device id ", i, " - ", self.p.get_device_info_by_host_api_device_index(0, i).get('name'))
 
         return -1
-    
+
     def __capture(self, length: float = 5.0):
         stream = self.p.open(
-                rate=self.sample_rate,
-                format=self.format,
-                channels=2,
-                input=True,
-                input_device_index=self.device_ID
-                )
+            rate=self.sample_rate,
+            format=self.format,
+            channels=2,
+            input=True,
+            input_device_index=self.device_ID
+        )
 
-        #print(f"* Recording {length}s")
+        # print(f"* Recording {length}s")
         frames = []
 
         for i in range(int(self.sample_rate / 1024 * length)):
             data = stream.read(1024, exception_on_overflow=False)
-            a = np.fromstring(data,dtype=np.int16)[0::2]
+            a = np.fromstring(data, dtype=np.int16)[0::2]
             frames.append(a.tostring())
 
-        #print("* Done")
+        # print("* Done")
         stream.stop_stream()
         stream.close()
 
