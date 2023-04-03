@@ -79,10 +79,10 @@ if __name__ == "__main__":
         
         elif cmd == "data_debug":
             subject_name = input("Please enter subject name: ")
-            dc.datacollection(subject_name, debug=True)
+            dc.run(subject_name, debug=True)
         
         elif cmd == "aggregate":
-            agg.predict(10)
+            agg.predict(2)
 
         elif cmd == "profile":
             gsr_time = 0
