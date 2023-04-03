@@ -21,10 +21,10 @@ def push_to_tty(values: list):
 
 class DataCollection:
     def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, led_array: LEDArray):
-        self._GSR_MODEL = gsr_model
-        self._SPEECH_MODEL = speech_model
+        self.gsr_model = gsr_model
+        self.speech_model = speech_model
         self.led = led_array
-        self.PP = PychartPusher()
+        self.pychart = PychartPusher()
 
     @staticmethod
     def empty_sample_dict():
@@ -41,14 +41,14 @@ class DataCollection:
 
     def sample_gsr(self, queue):
         while True:
-            phasic, tonic, stat = self._GSR_MODEL.predict()
+            phasic, tonic, stat = self.gsr_model.predict()
 
             if stat == "optimal":
                 queue.put([phasic, tonic])
 
     def sample_speech(self, queue):
         while True:
-            prob, samples = self._SPEECH_MODEL.predict(2.75)
+            prob, samples = self.speech_model.predict(2.75)
             prob = list(prob.values())
             samples = list(samples)
 
@@ -105,7 +105,6 @@ class DataCollection:
 
     def run(self, subject_name: str, debug=False):
         s = time.time()
-        debug_time = 0
 
         timestamp = str(datetime.datetime.now()).split(" ")[0]
         filename = f"respira_{subject_name}_{timestamp}.json"
@@ -115,9 +114,8 @@ class DataCollection:
             "date": timestamp
         }
 
-        debug_time = t = s - time.time()
-
-        print(f"debug_time so far: {debug_time}")  # DEBUG
+        print(f"Please press play now!")
+        t = s - time.time()
 
         # TEST BEGIN  ---------------------------------------------
 
@@ -148,11 +146,12 @@ class DataCollection:
 
         # First Baseline Test ------------------------------------
         print("Baseline Test")
-        t = 0  # DEBUG
+        t = time.time()
 
         data["baseline"] = self.empty_sample_dict()
         self.run_prediction(data, "baseline", True, True, 30-6)
 
+        t = time.time() - t
         print(f"End of Baseline Test (time: {t}s)")
 
         # Reading time ------------------------------------------
@@ -165,6 +164,7 @@ class DataCollection:
         data["expiration1"] = self.empty_sample_dict()
         self.run_prediction(data, "expiration1", True, False, 60-10)
 
+        t += time.time() - t
         print(f"End of Expiration Test (time: {t}s)")
 
         # Reading time ------------------------------------------
@@ -182,6 +182,7 @@ class DataCollection:
         data["rest1"] = self.empty_sample_dict()
         self.run_prediction(data, "rest1", True, False, 30-6)
 
+        t += time.time() - t
         print(f"End of Rest #1 (time: {t}s)")
 
         # Reading time ------------------------------------------
@@ -194,6 +195,7 @@ class DataCollection:
         data["expiration2"] = self.empty_sample_dict()
         self.run_prediction(data, "expiration2", True, False, 60-10)
 
+        t += time.time() - t
         print(f"End of Expiration #2 Test (time: {t}s)")
 
         # Reading time ------------------------------------------
@@ -211,6 +213,7 @@ class DataCollection:
         data["rest2"] = self.empty_sample_dict()
         self.run_prediction(data, "rest2", True, False, 30-7.5)
 
+        t += time.time() - t
         print(f"End of Rest #2 (time: {t}s)")
 
         # Reading time ------------------------------------------
@@ -223,6 +226,7 @@ class DataCollection:
         data["video"] = self.empty_sample_dict()
         self.run_prediction(data, "video", True, False, 150-10)
 
+        t += time.time() - t
         print(f"End of Video Test. (time: {t})")
 
         # Reading time -----------------------------------------
@@ -240,6 +244,7 @@ class DataCollection:
         data["rest3"] = self.empty_sample_dict()
         self.run_prediction(data, "rest3", True, False, 30-6)
 
+        t += time.time() - t
         print(f"End of Rest #3 (time: {t}s)")
 
         # Reading time -----------------------------------------
@@ -252,6 +257,7 @@ class DataCollection:
         data["recitation"] = self.empty_sample_dict()
         self.run_prediction(data, "recitation", True, True, 30-5)
 
+        t += time.time() - t
         print(f"End of Reciting Test #4 (time: {t}s)")
 
         # Reading time -----------------------------------------
@@ -269,6 +275,7 @@ class DataCollection:
         data["rest4"] = self.empty_sample_dict()
         self.run_prediction(data, "rest4", True, False, 30-5)
 
+        t += time.time() - t
         print(f"End of Rest #4 (time: {t}s)")
 
         # TEST FINISHED ---------------------------------------!
@@ -278,7 +285,7 @@ class DataCollection:
             json_dumps_str = json.dumps(data, indent=4)
             print(json_dumps_str, file=fout)
 
-        debug_time += t
+        t += time.time() - t
 
         print("End of data collection protocol")
         print(f"Total Time to complete: {time.time() - s}s")

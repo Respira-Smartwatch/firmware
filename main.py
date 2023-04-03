@@ -82,7 +82,7 @@ if __name__ == "__main__":
             dc.datacollection(subject_name, debug=True)
         
         elif cmd == "aggregate":
-            agg.predict(10)
+            agg.predict(2)
 
         elif cmd == "profile":
             gsr_time = 0
