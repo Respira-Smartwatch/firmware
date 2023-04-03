@@ -48,7 +48,7 @@ class Aggregate:
         val = 0
         confid = 0
         for s in range(samples):
-            phasic, tonic = self.gsr.predict()
+            phasic, tonic, _ = self.gsr.predict()
             average.append(tonic)
             av = sum(average) / len(average)
             if s % 5:

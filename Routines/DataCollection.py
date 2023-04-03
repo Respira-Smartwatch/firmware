@@ -64,12 +64,13 @@ class DataCollection:
         # Sample before time runs out
         start_time = time.time()
 
+        gsr_p = multiprocessing.Process(target=self.sample_gsr, args=(gsr_q,))
+        speech_p = multiprocessing.Process(target=self.sample_speech, args=(speech_q,))
+
         if gsr:
-            gsr_p = multiprocessing.Process(target=self.sample_gsr, args=(gsr_q,))
             gsr_p.start()
 
         if speech:
-            speech_p = multiprocessing.Process(target=self.sample_speech, args=(speech_q,))
             speech_p.start()
 
         gsr_array = []
