@@ -114,6 +114,8 @@ class DataCollection:
             "date": timestamp
         }
 
+        time.sleep(2)
+
         print(f"Please press play now!")
         t = s - time.time()
 
@@ -289,4 +291,4 @@ class DataCollection:
 
         print("End of data collection protocol")
         print(f"Total Time to complete: {time.time() - s}s")
-        print(f"Total prediction time computed: {debug_time}s")
+        print(f"Total prediction time computed: {t}s")

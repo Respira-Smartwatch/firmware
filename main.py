@@ -43,8 +43,8 @@ if __name__ == "__main__":
     speech_duration_s = 5.0
     gsr_gating_threshold = 25
 
+    led.idle()
     while True:
-        led.idle()
         cmd = input("> ")
 
         if cmd == "help" or cmd == "":
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             dc.run(subject_name, debug=True)
         
         elif cmd == "aggregate":
-            agg.predict(2)
+            agg.predict(30)
 
         elif cmd == "profile":
             gsr_time = 0
