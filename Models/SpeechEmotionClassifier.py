@@ -25,10 +25,14 @@ class SpeechEmotionClassifier:
         probabilities = probabilities[0]
 
         result = {
-            "happy": probabilities[0] * 100.0,
-            "sad": probabilities[1] * 100.0,
-            "disgust": probabilities[2] * 100.0,
-            "surprise": probabilities[3] * 100.0
+            "neutral": probabilities[0] * 100.0,
+            "calm": probabilities[1] * 100.0,
+            "happy": probabilities[2] * 100.0,
+            "sad": probabilities[3] * 100.0,
+            "angry": probabilities[4] * 100.0,
+            "fearful": probabilities[5] * 100.0,
+            "disgust": probabilities[6] * 100.0,
+            "surprise": probabilities[7] * 100.0
         }
 
         return result, samples
