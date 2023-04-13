@@ -40,7 +40,7 @@ class Aggregate:
             "date": timedate
         }
 
-        stress_eval = {"calm": 0.05, "happy": 0.1, "neutral": 0.2, "sad": 0.3, "fearful": 0.35, "angry": 0.5, "surprise": 0.75, "disgust": 0.9}  # scales confidence
+        stress_eval = {"calm": 0.1, "happy": 0.13, "neutral": 0.25, "sad": 0.37, "fearful": 0.38, "angry": 0.5, "surprise": 0.76, "disgust": 0.92}  # scales confidence
         # NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
         average = []
         val = 0
@@ -78,35 +78,32 @@ class Aggregate:
 
             val = dcf[s]
 
-            #phasic, tonic, _ = self.gsr.predict()
-            #average.append(tonic)
-            #av = sum(average) / len(average)
-            #if s % 5:
-            #    for t in range(len(average)):
-            #        if t == 0:
-            #            ran = 0  # state machine to transition to speech recording
-            #            val = 0
-            #        else:
-            #            val += abs(average[t] - average[t - 1])
-            #    if (np.max(average) - np.min(average)) != 0:
-            #        val = ((val / 5) - np.min(average)) / (np.max(average) - np.min(
-            #            average))  # normalize range for average tonic sample difference from 0 to 1
-            #    average = []
-
-                # only runs speech classifier once during sampling
+            # only runs speech classifier once during sampling
             if abs(val) > self.threshold and ran == 0:
                 print("\nReading Speech Data\n")
                 ran = 1
                 speech_data, _ = self.speech.predict()
-                maximum = speech_data['happy']  # default
+                sig_count = 0 # number of significant speech outputs
+                stress = 0 # weight accumulation
+                maximum = 0  # probability accumulation
+                max_val = 0 # default maximum probability
                 for key, value in speech_data.items():
-                    if (value >= maximum):
-                        maximum = value
+                    print(key, value)
+                    if (value >= max_val):
+                        max_val = value
                         max_key = key
-                        confid = maximum / 100
-                        stress = stress_eval[key]
-                        confid = (stress * confid)
-                        # turn on LEDs based on new value
+                    if (value >= 80): # large probabilities 80%
+                        maximum = value
+                        stress = stress_eval[key] # weights
+                        sig_count += 1
+                    elif (value < 80 and value >= 35): # small probabilities 35%
+                        maximum += value
+                        stress += stress_eval[key] # weights
+                        sig_count += 1
+                confid = (maximum/sig_count) / 100
+                confid = (stress/sig_count) * confid
+
+                # turn on LEDs based on new value
                 self.LED(confid)
 
             timestamp = str(datetime.datetime.now()).split(" ")[1]
@@ -114,7 +111,7 @@ class Aggregate:
                 data[timestamp] = self.empty_sample_dict()
                 data[timestamp]["average_gsr_tonic"] = av
                 data[timestamp]["speech_class"] = max_key
-                data[timestamp]["speech_probability"] = maximum
+                data[timestamp]["speech_probability"] = max_val
                 data[timestamp]["stress_score"] = confid
             else:
                 data[timestamp] = self.empty_sample_dict()
