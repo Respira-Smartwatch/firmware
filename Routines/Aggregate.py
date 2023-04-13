@@ -15,7 +15,7 @@ class Aggregate:
         self.gsr = gsr_model # GSR gives instant stress *(physiological)
         self.speech = speech_model # Speech gives psychological stress
         self.led = ledarray
-        self.threshold = 1
+        self.threshold = 3
 	
     @staticmethod
     def empty_sample_dict():
@@ -49,19 +49,46 @@ class Aggregate:
             phasic, tonic = self.gsr.predict()
             average.append(tonic)
             av = sum(average)/len(average)
-            if s % 5:
-                for t in range(len(average)):
-                    if t == 0:
-                        ran = 0 # state machine to transition to speech recording
-                        val = 0
-                    else:
-                        val += abs(average[t] - average[t-1])
-                if ((np.max(average) - np.min(average)) != 0):
-                    val = ((val/5) - np.min(average)) / (np.max(average) - np.min(average)) # normalize range for average tonic sample difference from 0 to 1
-                average = []  
+
+            # CMNDF
+            diff = [0] * len(average)
+            for i in range(len(average)):
+                for j in range(len(average) - i):
+                    diff[i] = pow(average[j] - average[j+i], 2)
+                    
+            cmndf = [0] * len(average)
+            cmndf[0] = 1
+
+            for i in range(1, len(diff)):
+                dsum = 0
+            
+                for j in range(1, i+1):
+                    dsum += diff[j]
+                    
+                cmndf[i] = diff[i] * (i / dsum)
+
+            #derivative function for cmndf
+            #can possibly optimize by finding slope from previous value
+            dt = 1.0
+            dcf = [0] * len(average)
+            dcf = np.diff(cmndf) / dt
+            dcf = np.insert(dcf, 0, 0)
+
+            val = dcf[s]
+            #Previous method for determining normalized value
+            # if s % 5:
+            #     for t in range(len(average)):
+            #         if t == 0:
+            #             ran = 0 # state machine to transition to speech recording
+            #             val = 0
+            #         else:
+            #             val += abs(average[t] - average[t-1]) #adds changes in samples over time
+            #     if ((np.max(average) - np.min(average)) != 0): #if the max sample value different than the min sample value
+            #         val = ((val/5) - np.min(average)) / (np.max(average) - np.min(average)) # normalize range for average tonic sample difference from 0 to 1
+            #     average = []  
 
             #only runs speech classifier once during sampling
-            if abs(val) > self.threshold and ran == 0:
+            if val > self.threshold and ran == 0:
                 print("\nReading Speech Data\n")
                 ran = 1
                 speech_data,_ = self.speech.predict()
