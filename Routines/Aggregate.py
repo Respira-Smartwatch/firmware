@@ -40,9 +40,7 @@ class Aggregate:
             "date": timedate
         }
 
-        # 
-        stress_eval = {"happy": 0.1, "sad": 0.3, "disgust": 0.75,
-                       "surprise": 1}  # scalers for emotion to stress response on confidence value NOTE: UPDATES
+        stress_eval = {"calm": 0.05, "happy": 0.1, "neutral": 0.2, "sad": 0.3, "fearful": 0.35, "angry": 0.5, "surprise": 0.75, "disgust": 0.9}  # scales confidence
         # NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
         average = []
         ran = 0
