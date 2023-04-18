@@ -15,7 +15,7 @@ class Aggregate:
         self.gsr = gsr_model  # GSR gives instant stress *(physiological)
         self.speech = speech_model  # Speech gives psychological stress
         self.led = ledarray
-        self.threshold = 1
+        self.threshold = 3
 
     @staticmethod
     def empty_sample_dict():
@@ -40,13 +40,12 @@ class Aggregate:
             "date": timedate
         }
 
-        stress_eval = {"calm": 0.1, "happy": 0.13, "neutral": 0.25, "sad": 0.37, "fearful": 0.38, "angry": 0.5, "surprise": 0.76, "disgust": 0.92}  # scales confidence
+        stress_eval = {"calm": 0.0, "happy": 0.25, "neutral": 0.5, "sad": 0.75, "fearful": 0.85, "angry": 0.65, "surprise": 0.55, "disgust": 0.6}  # scales confidence
         # NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
         average = []
         val = 0
         confid = 0
         for s in range(samples):
-            
             ran = 0
             phasic, tonic, _ = self.gsr.predict()
             average.append(tonic)
@@ -149,4 +148,5 @@ class Aggregate:
             red = int(255 * confid)  # indicates stress
             green = int(255 - (255 * confid))  # does not indicate stress
         self.led.result(red, green)
+        print("LED Values: Red: ", red, "Green: ", green)
         return
