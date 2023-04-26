@@ -40,7 +40,7 @@ class Aggregate:
             "date": timedate
         }
 
-        stress_eval = {"calm": 0.0, "happy": 0.25, "neutral": 0.5, "sad": 0.75, "fearful": 0.85, "angry": 0.65, "surprise": 0.60, "disgust": 0.70}  # scales confidence
+        stress_eval = {"calm": 0.0, "happy": 0.25, "neutral": 0.5, "sad": 0.75, "fearful": 0.45, "angry": 0.65, "surprise": 0.60, "disgust": 0.70}  # scales confidence
         # NEEDED TO FIND REAL STRESS CLASS LABEL ACCURACY
         average = []
         val = 0
