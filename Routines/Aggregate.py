@@ -6,15 +6,16 @@ sys.path.insert(0, "/home/pi/firmware/Models")
 sys.path.insert(0, "/home/pi/firmware/Drivers")
 from GSRClassifier import GSRClassifier
 from SpeechEmotionClassifier import SpeechEmotionClassifier
-from Drivers import LEDArray
+from Drivers import LEDArray, PushButton
 import numpy as np
 
 
 class Aggregate:
-    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, ledarray: LEDArray):
+    def __init__(self, gsr_model: GSRClassifier, speech_model: SpeechEmotionClassifier, ledarray: LEDArray, button: PushButton):
         self.gsr = gsr_model  # GSR gives instant stress *(physiological)
         self.speech = speech_model  # Speech gives psychological stress
         self.led = ledarray
+        self.button = button
         self.threshold = 3
 
     @staticmethod
@@ -119,6 +120,10 @@ class Aggregate:
                     data[timestamp]["speech_class"] = 0
                     data[timestamp]["speech_probability"] = 0
                     data[timestamp]["stress_score"] = 0
+
+            if self.button.is_pressed():
+                print("Exiting aggregate loop")
+                break
 
         if should_export:
             with open(filename, 'w') as fout:

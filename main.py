@@ -37,7 +37,7 @@ if __name__ == "__main__":
     dc = DataCollection(gsr_model, speech_model, led)
     
     # Aggregate
-    agg = Aggregate(gsr_model, speech_model, led)
+    agg = Aggregate(gsr_model, speech_model, led, button)
 
     # Pychart logger
     pychart = PychartPusher() 
@@ -72,19 +72,16 @@ if __name__ == "__main__":
 
         elif cmd == "performance":
             # Adjust threshold for more dramatic LED fluctuations
+            thresh = input("Enter the threshold: ")
             old_thresh = agg.threshold
-            agg.threshold = 1
+            agg.threshold = thresh
 
             while True:
                 print("Taking 30 samples...")
-                agg.predict(30, should_export=False)
+                agg.predict(15, should_export=False)
 
-                if button.is_pressed():
-                    print("Exiting performance mode")
-                    break
-                else:
-                    print("Going to sleep\n")
-                    time.sleep(2)
+                print("Going to sleep\n")
+                time.sleep(2)
 
             # Restore threshold
             agg.threshold = old_thresh
