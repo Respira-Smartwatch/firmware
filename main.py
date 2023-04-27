@@ -74,11 +74,14 @@ if __name__ == "__main__":
             # Adjust threshold for more dramatic LED fluctuations
             thresh = input("Enter the threshold: ")
             old_thresh = agg.threshold
-            agg.threshold = thresh
+            agg.threshold = float(thresh)
 
             while True:
                 print("Taking 30 samples...")
                 agg.predict(15, should_export=False)
+
+                if button.is_pressed():
+                    break
 
                 print("Going to sleep\n")
                 time.sleep(2)
