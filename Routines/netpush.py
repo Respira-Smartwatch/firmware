@@ -47,6 +47,8 @@ if __name__ == "__main__":
     i = 0
     while True:
         try:
+            if i > 10:
+                i =0
             print(f"sending: {i}")
             netPush.data_send(i)
             i += 1
