@@ -2,7 +2,7 @@ import time
 
 from Routines import DataCollection
 from Routines import Aggregate
-from Routines import PychartPusher
+from Routines import PychartPusher, NetPusher
 
 from Drivers import LEDArray, PushButton
 from Models import GSRClassifier, SpeechEmotionClassifier
@@ -66,9 +66,15 @@ if __name__ == "__main__":
             print(emotions)
 
         elif cmd == "gsr":
-            phasic, tonic = capture_gsr(led, gsr_model)
-            print(f"GSR Phasic:\t{phasic}")
-            print(f"GSR Tonic:\t{tonic}")
+            np = NetPusher()
+
+            for i in range(100):
+                phasic, tonic = capture_gsr(led, gsr_model)
+                np.data_send(tonic)
+                print(f"GSR Phasic:\t{phasic}")
+                print(f"GSR Tonic:\t{tonic}")
+
+            np.close()
 
         elif cmd == "performance":
             # Adjust threshold for more dramatic LED fluctuations

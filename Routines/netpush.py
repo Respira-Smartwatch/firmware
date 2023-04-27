@@ -6,7 +6,7 @@ class NetPusher:
         self.socket = None
         self.conn = None
         self.host = ''
-        self.port = 44443
+        self.port = 44444
         self.address = None
 
         self.setupServer()
