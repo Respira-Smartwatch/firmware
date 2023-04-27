@@ -1,8 +1,10 @@
+import time
+
 from Routines import DataCollection
 from Routines import Aggregate
 from Routines import PychartPusher
 
-from Drivers import LEDArray
+from Drivers import LEDArray, PushButton
 from Models import GSRClassifier, SpeechEmotionClassifier
 from Routines import DataCollection
 from timeit import default_timer as timer
@@ -27,8 +29,9 @@ if __name__ == "__main__":
     gsr_model = GSRClassifier()
     speech_model = SpeechEmotionClassifier()
 
-    # LED
+    # IO CTRL
     led = LEDArray()
+    button = PushButton()
     
     # DataCollect Instance
     dc = DataCollection(gsr_model, speech_model, led)
@@ -68,10 +71,23 @@ if __name__ == "__main__":
             print(f"GSR Tonic:\t{tonic}")
 
         elif cmd == "performance":
+            # Adjust threshold for more dramatic LED fluctuations
+            old_thresh = agg.threshold
+            agg.threshold = 1
+
             while True:
-                phasic, tonic = capture_gsr(led, gsr_model)
-                print(f"GSR Tonic:\t{tonic}")
-                pychart.send(message=f"{tonic}")
+                print("Taking 30 samples...")
+                agg.predict(30, should_export=False)
+
+                if button.is_pressed():
+                    print("Exiting performance mode")
+                    break
+                else:
+                    print("Going to sleep\n")
+                    time.sleep(2)
+
+            # Restore threshold
+            agg.threshold = old_thresh
 
         elif cmd == "data_collect":
             subject_name = input("Please enter subject name: ")

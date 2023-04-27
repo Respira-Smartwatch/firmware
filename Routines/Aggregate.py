@@ -26,7 +26,7 @@ class Aggregate:
             "stress_score": []
         })
 
-    def predict(self, samples: int):
+    def predict(self, samples: int, should_export: bool = True):
         # average tonic to make baseline
         # compare new values to previous baseline
         # if new value - baseline is > threshold, then activate speech classifier
@@ -105,23 +105,25 @@ class Aggregate:
                 # turn on LEDs based on new value
                 self.LED(confid)
 
-            timestamp = str(datetime.datetime.now()).split(" ")[1]
-            if ran:
-                data[timestamp] = self.empty_sample_dict()
-                data[timestamp]["average_gsr_tonic"] = av
-                data[timestamp]["speech_class"] = max_key
-                data[timestamp]["speech_probability"] = max_val
-                data[timestamp]["stress_score"] = confid
-            else:
-                data[timestamp] = self.empty_sample_dict()
-                data[timestamp]["average_gsr_tonic"] = av
-                data[timestamp]["speech_class"] = 0
-                data[timestamp]["speech_probability"] = 0
-                data[timestamp]["stress_score"] = 0
+            if should_export:
+                timestamp = str(datetime.datetime.now()).split(" ")[1]
+                if ran:
+                    data[timestamp] = self.empty_sample_dict()
+                    data[timestamp]["average_gsr_tonic"] = av
+                    data[timestamp]["speech_class"] = max_key
+                    data[timestamp]["speech_probability"] = max_val
+                    data[timestamp]["stress_score"] = confid
+                else:
+                    data[timestamp] = self.empty_sample_dict()
+                    data[timestamp]["average_gsr_tonic"] = av
+                    data[timestamp]["speech_class"] = 0
+                    data[timestamp]["speech_probability"] = 0
+                    data[timestamp]["stress_score"] = 0
 
-        with open(filename, 'w') as fout:
-            json_dumps_str = json.dumps(data, indent=4)
-            print(json_dumps_str, file=fout)
+        if should_export:
+            with open(filename, 'w') as fout:
+                json_dumps_str = json.dumps(data, indent=4)
+                print(json_dumps_str, file=fout)
 
     def LED(self, confid):
         # assumes Confid is confidence score normalized 0-1 for how stress the individual is

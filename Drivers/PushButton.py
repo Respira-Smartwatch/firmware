@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
-class button:
+class PushButton:
     def __init__(self):
         self.but = 17
         GPIO.setmode(GPIO.BCM)
@@ -16,3 +16,6 @@ class button:
                 print("on")
                 break
             time.sleep(0.05)
+
+    def is_pressed(self):
+        return not GPIO.input(self.but)
