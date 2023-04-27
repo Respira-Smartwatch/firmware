@@ -6,7 +6,7 @@ class NetPusher:
         self.socket = None
         self.conn = None
         self.host = ''
-        self.port = 44446
+        self.port = 44443
         self.address = None
 
         self.setupServer()
@@ -34,7 +34,7 @@ class NetPusher:
 
     def data_send(self, value):
         if self.conn:
-            self.conn.sendall(str.encode(value))
+            self.conn.sendall(str.encode(f"{value}"))
         else:
             return None
 
