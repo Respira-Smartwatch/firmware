@@ -1,56 +1,66 @@
 import socket
 import time
 
-s = socket.socket()
-host = ''
-port = 44444
+class NetPusher:
+    def __init__(self):
+        self.socket = None
+        self.conn = None
+        self.host = ''
+        self.port = 44446
+        self.address = None
 
-def setupServer():
-    global host, port
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print("CREATED")
+        self.setupServer()
+        self.setupConnection()
 
-    try:
-        s.bind((host, port))
-    except socket.error as msg:
-        print(msg)
+    def setupServer(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("CREATED")
 
-    print("SOCKET BIND COMPLETE")
-    return s
+        try:
+            self.socket.bind((self.host, self.port))
+        except socket.error as msg:
+            print(msg)
+            return False
 
-def setupConnection():
-    s.listen(1)
-    conn, address = s.accept()
+        print("SOCKET BIND COMPLETE")
+        return self.socket
 
-    print(f"CONNECTED to {address[0]} : {address[1]}")
-    return con
-
-def GET(val):
-    return val
-
-def dataTransfer(conn, value):
-    conn.sendall(str.encode(value))
+    def setupConnection(self):
+        self.socket.listen(1)
+        self.conn, self.address = self.socket.accept()
+        print(f"CONNECTED to {self.address[0]} : {self.address[1]}")
+        return self.conn
 
 
-def close():
-    conn.close()
+    def data_send(self, value):
+        if self.conn:
+            self.conn.sendall(str.encode(value))
+        else:
+            return None
 
-s = setupServer()
+    def close(self):
+        self.conn.close()
+        self.socket.close()
 
-while True:
-    global conn
-    try:
-        conn = setupConnection()
-        dataTransfer(conn, "asdf")
-    except:
-        conn.close()
-        break
+if __name__ == "__main__":
+    netPush = NetPusher()
+    i = 0
+    while True:
+        try:
+            print(f"sending: {i}")
+            netPush.data_send(i)
+            i += 1
+        except KeyboardInterrupt:
+            pass
+            #netPush.close()
+            #break
 
 #s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 #s.bind(('', port))
 #s.listen(5)
 #i=0
 #
+#s.close()
 #while True:
 #    try:
 #        c,addr = s.accept()

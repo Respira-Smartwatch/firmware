@@ -45,7 +45,7 @@ class Aggregate:
         average = []
         val = 0
         confid = 0
-        for s in range(samples):
+        for s in range(samples): # Actual sample size approach
             ran = 0
             phasic, tonic, _ = self.gsr.predict()
             average.append(tonic)
